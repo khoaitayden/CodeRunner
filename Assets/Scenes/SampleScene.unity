@@ -733,7 +733,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f6480a3d09a8ca44a8c6808bc5d8045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelJson: {fileID: 4900000, guid: cf9bfe1c697b6f0488f5a55e84800ca4, type: 3}
+  levelFiles:
+  - {fileID: 4900000, guid: cf9bfe1c697b6f0488f5a55e84800ca4, type: 3}
+  - {fileID: 4900000, guid: 918b1935d808f7c47b92d865f79ff0fa, type: 3}
   playerPrefab: {fileID: 6724069641675009704, guid: 75c846321eb58ab4ea8832e6de9ce7eb, type: 3}
   baseLayer: {fileID: 1236824271}
   interactableLayer: {fileID: 511549361}
@@ -746,12 +748,12 @@ MonoBehaviour:
     tileAsset: {fileID: 11400000, guid: 30bd708cbbb846b448a1a38f65a68902, type: 2}
   - type: 4
     tileAsset: {fileID: 11400000, guid: 44b6ef87b5c797d4abda73d02a17ee2e, type: 2}
-  - type: 5
-    tileAsset: {fileID: 11400000, guid: 9817e8b9e0a324541bf1e8f455d5c5c8, type: 2}
-  - type: 6
-    tileAsset: {fileID: 11400000, guid: f57062fa9a1f1ed459a1e64607fbd0a9, type: 2}
   - type: 2
     tileAsset: {fileID: 0}
+  switchOnTile: {fileID: 11400000, guid: f3efe54c7074a3d48bd6f0c0c47a0c1e, type: 2}
+  switchOffTile: {fileID: 11400000, guid: 9817e8b9e0a324541bf1e8f455d5c5c8, type: 2}
+  bridgeActiveTile: {fileID: 11400000, guid: 3a9b204f9b63ce94f83a8a807b07c76e, type: 2}
+  bridgeInactiveTile: {fileID: 11400000, guid: f57062fa9a1f1ed459a1e64607fbd0a9, type: 2}
 --- !u!4 &1240401671
 Transform:
   m_ObjectHideFlags: 0

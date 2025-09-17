@@ -94,7 +94,8 @@ public class BoardManager : MonoBehaviour
     // This method now contains the core logic that was in LoadAndGenerateBoard()
     private void BuildBoardFromData(TextAsset levelAsset)
     {
-        LevelData loadedLevel = JsonUtility.FromJson<LevelData>(levelAsset.text);
+        CompactLevelData compactLevel = JsonUtility.FromJson<CompactLevelData>(levelAsset.text);
+        LevelData loadedLevel = ParseCompactLevelData(compactLevel);
         boardData = new TileData[loadedLevel.width, loadedLevel.height];
 
         Vector2Int startPosition = Vector2Int.zero;
@@ -172,9 +173,9 @@ public class BoardManager : MonoBehaviour
             case TileType.Switch:
                 ToggleSwitch(tile);
                 break;
-            
+
             // The Air case is no longer needed here!
-            
+
             case TileType.End:
                 Debug.Log("Player reached the end! Loading next level.");
                 LoadNextLevel();
@@ -339,5 +340,98 @@ public class BoardManager : MonoBehaviour
     {
         Debug.Log("Loading next level...");
         LoadLevel(currentLevelIndex + 1);
+    }
+    
+    private LevelData ParseCompactLevelData(CompactLevelData compactData)
+    {
+        var definitions = new Dictionary<string, TileDefinition>();
+        if (compactData.definitions != null)
+        {
+            foreach (var def in compactData.definitions)
+            {
+                definitions[def.key] = def;
+            }
+        }
+
+        var levelData = new LevelData();
+        if (compactData.layout == null || compactData.layout.Count == 0)
+        {
+            levelData.height = 0;
+            levelData.width = 0;
+            return levelData;
+        }
+
+        levelData.height = compactData.layout.Count;
+        levelData.width = compactData.layout[0].Length;
+
+        // We read it "backwards" (y=0 is the bottom row) to match Unity's coordinate system.
+        for (int y = 0; y < levelData.height; y++)
+        {
+            string row = compactData.layout[levelData.height - 1 - y];
+            for (int x = 0; x < levelData.width; x++)
+            {
+                // --- NEW, IMPROVED PARSING LOGIC ---
+
+                // 1. Try to match a multi-character key first.
+                // We search for the longest possible key starting at this position.
+                string matchedKey = null;
+                foreach (var key in definitions.Keys)
+                {
+                    if (row.Substring(x).StartsWith(key))
+                    {
+                        // If we find a match, check if it's the longest one we've found so far
+                        if (matchedKey == null || key.Length > matchedKey.Length)
+                        {
+                            matchedKey = key;
+                        }
+                    }
+                }
+
+                TileData tile = new TileData { position = new Vector2Int(x, y) };
+
+                if (matchedKey != null)
+                {
+                    // We found a defined key like "SW1" or "B1"
+                    var def = definitions[matchedKey];
+                    tile.type = def.type;
+                    tile.switchId = def.switchId;
+                    tile.controlledBySwitchId = def.controlledBySwitchId;
+                    tile.isBridgeInitiallyActive = def.isBridgeInitiallyActive;
+                    tile.activateOnSwitchOn = def.activateOnSwitchOn;
+
+                    levelData.tiles.Add(tile);
+
+                    // IMPORTANT: Skip the characters we just read as part of the key
+                    x += matchedKey.Length - 1;
+                }
+                else
+                {
+                    // 2. If no multi-character key was found, fall back to single-character symbols.
+                    char symbol = row[x];
+                    bool isSymbolRecognized = true;
+
+                    switch (symbol)
+                    {
+                        case '.': tile.type = "Floor"; break;
+                        case '#': tile.type = "Wall"; break;
+                        case 'S': tile.type = "Start"; break;
+                        case 'E': tile.type = "End"; break;
+                        case ' ': tile.type = "Air"; break;
+                        default:
+                            // Unrecognized single symbol
+                            isSymbolRecognized = false;
+                            Debug.LogWarning($"Unrecognized symbol '{symbol}' at ({x},{y}). Treating as Air.");
+                            break;
+                    }
+                    
+                    // Only add a tile if it's not air from an unrecognized symbol
+                    if (isSymbolRecognized && tile.type != "Air")
+                    {
+                        levelData.tiles.Add(tile);
+                    }
+                }
+            }
+        }
+        return levelData;
     }
 }
