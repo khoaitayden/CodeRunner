@@ -1,0 +1,12 @@
+{
+  "layout": [
+    "S.W3.E"
+  ],
+  "definitions": [
+    {
+      "key": "W3",
+      "type": "WeakFloor",
+      "initialSteps": 3
+    }
+  ]
+}

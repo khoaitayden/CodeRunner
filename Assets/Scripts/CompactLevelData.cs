@@ -10,6 +10,7 @@ public class TileDefinition
     public int controlledBySwitchId = 0;
     public bool isBridgeInitiallyActive = true;
     public bool activateOnSwitchOn = true;
+    public int initialSteps = 0;
 }
 
 // Represents the entire compact JSON file structure

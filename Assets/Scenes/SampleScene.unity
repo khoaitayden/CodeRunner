@@ -409,7 +409,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 2, y: 2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -736,24 +736,31 @@ MonoBehaviour:
   levelFiles:
   - {fileID: 4900000, guid: cf9bfe1c697b6f0488f5a55e84800ca4, type: 3}
   - {fileID: 4900000, guid: 918b1935d808f7c47b92d865f79ff0fa, type: 3}
+  - {fileID: 4900000, guid: b89f83925a5222649a996c7a9285d4b7, type: 3}
   playerPrefab: {fileID: 6724069641675009704, guid: 75c846321eb58ab4ea8832e6de9ce7eb, type: 3}
   baseLayer: {fileID: 1236824271}
   interactableLayer: {fileID: 511549361}
   tileMappings:
   - type: 0
-    tileAsset: {fileID: 11400000, guid: c7b703102879c4544bab36a856a2fe39, type: 2}
-  - type: 1
     tileAsset: {fileID: 11400000, guid: 1ac87d3e0ea00df45a9f7f9c6188dfcd, type: 2}
-  - type: 3
+  - type: 1
     tileAsset: {fileID: 11400000, guid: 30bd708cbbb846b448a1a38f65a68902, type: 2}
-  - type: 4
+  - type: 3
     tileAsset: {fileID: 11400000, guid: 44b6ef87b5c797d4abda73d02a17ee2e, type: 2}
+  - type: 4
+    tileAsset: {fileID: 11400000, guid: 9817e8b9e0a324541bf1e8f455d5c5c8, type: 2}
   - type: 2
     tileAsset: {fileID: 0}
   switchOnTile: {fileID: 11400000, guid: f3efe54c7074a3d48bd6f0c0c47a0c1e, type: 2}
-  switchOffTile: {fileID: 11400000, guid: 9817e8b9e0a324541bf1e8f455d5c5c8, type: 2}
-  bridgeActiveTile: {fileID: 11400000, guid: 3a9b204f9b63ce94f83a8a807b07c76e, type: 2}
-  bridgeInactiveTile: {fileID: 11400000, guid: f57062fa9a1f1ed459a1e64607fbd0a9, type: 2}
+  switchOffTile: {fileID: 11400000, guid: 3a9b204f9b63ce94f83a8a807b07c76e, type: 2}
+  bridgeActiveTile: {fileID: 11400000, guid: f57062fa9a1f1ed459a1e64607fbd0a9, type: 2}
+  bridgeInactiveTile: {fileID: 11400000, guid: 8c313b689300e134ca82c4a12fdc3e92, type: 2}
+  weakFloorTiles:
+  - {fileID: 11400000, guid: c7b703102879c4544bab36a856a2fe39, type: 2}
+  - {fileID: 11400000, guid: c7b703102879c4544bab36a856a2fe39, type: 2}
+  - {fileID: 11400000, guid: c7b703102879c4544bab36a856a2fe39, type: 2}
+  - {fileID: 11400000, guid: c7b703102879c4544bab36a856a2fe39, type: 2}
+  - {fileID: 11400000, guid: c7b703102879c4544bab36a856a2fe39, type: 2}
 --- !u!4 &1240401671
 Transform:
   m_ObjectHideFlags: 0
