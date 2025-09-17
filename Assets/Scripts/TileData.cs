@@ -36,5 +36,5 @@ public class TileData
     // These are ignored by the JSON serializer and are managed by the BoardManager at runtime.
     [System.NonSerialized] public bool isOn = false;     // For Switches: current on/off state.
     [System.NonSerialized] public bool isActive = false; // For Bridges: current active/inactive state.
-    [System.NonSerialized] public bool hasBeenVisited = false;
+    
 }

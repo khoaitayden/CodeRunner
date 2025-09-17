@@ -68,19 +68,36 @@ public class PlayerController : MonoBehaviour
     public void MoveForward()
     {
         Vector2Int targetPosition = currentPosition + directionVectors[currentDirection];
+        
+        // Ask the board manager for the result of the attempted move
+        MoveResult result = boardManager.CheckMove(targetPosition);
 
-        if (boardManager.IsTileWalkable(targetPosition))
+        switch (result)
         {
-            currentPosition = targetPosition;
-            UpdateVisuals();
-            Debug.Log("Moved Forward to: " + currentPosition);
+            case MoveResult.Success:
+                // Valid move! Update logical position and visuals.
+                currentPosition = targetPosition;
+                UpdateVisuals();
+                Debug.Log("Moved Forward to: " + currentPosition);
+                
+                // Notify the board manager that we have landed on a new tile.
+                boardManager.PlayerLandedOnTile(currentPosition);
+                break;
 
-            // Notify the board manager that we have landed on a new tile.
-            boardManager.PlayerLandedOnTile(currentPosition);
-        }
-        else
-        {
-            Debug.Log("Move failed. Blocked by wall, inactive bridge, or edge.");
+            case MoveResult.Blocked:
+                // The move is blocked by a wall. Do nothing but give feedback.
+                Debug.Log("Move failed. Blocked by a wall.");
+                // Here you could play a "bump" sound or animation.
+                break;
+
+            case MoveResult.Fall:
+                // The player tried to move to a hazard tile. Trigger a reset.
+                Debug.Log("Move failed. Fell off the edge, into air, or onto an inactive bridge.");
+                
+                // Optionally, you can play a "fall" animation here before restarting.
+                // For now, we restart immediately.
+                boardManager.RestartLevel();
+                break;
         }
     }
 

@@ -1,0 +1,21 @@
+{
+  "width": 7,
+  "height": 7,
+  "tiles": [
+
+    { "type": "Start", "position": { "x": 1, "y": 1 } },
+    { "type": "Air", "position": { "x": 2, "y": 1 } },
+    { "type": "Air", "position": { "x": 3, "y": 1 } },
+    { "type": "Air", "position": { "x": 4, "y": 1 } },
+    { "type": "End", "position": { "x": 5, "y": 1 } },
+
+    { "type": "Bridge", "position": { "x": 1, "y": 2 },"controlledBySwitchId": 1, "isBridgeInitiallyActive": true, "activateOnSwitchOn": false},
+    { "type": "Floor", "position": { "x": 5, "y": 2 } },
+
+    { "type": "Switch", "position": { "x": 1, "y": 3 }, "switchId": 1 },
+    { "type": "Bridge", "position": { "x": 2, "y": 3 }, "controlledBySwitchId": 1, "isBridgeInitiallyActive": false, "activateOnSwitchOn": true },
+    { "type": "Floor", "position": { "x": 3, "y": 3 } },
+    { "type": "Floor", "position": { "x": 4, "y": 3 } },
+    { "type": "Floor", "position": { "x": 5, "y": 3 }}
+  ]
+}

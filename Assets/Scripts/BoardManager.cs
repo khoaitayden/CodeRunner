@@ -10,10 +10,18 @@ public class TileMapping
     public TileBase tileAsset;
 }
 
+public enum MoveResult
+{
+    Success, // The tile is safe to walk on
+    Blocked, // A wall, player cannot move
+    Fall     // An edge, air, or inactive bridge; triggers a reset
+}
+
 public class BoardManager : MonoBehaviour
 {
     [Header("Level Data")]
-    public TextAsset levelJson;
+    public List<TextAsset> levelFiles; // ...with this list.
+    private int currentLevelIndex = 0;
 
     [Header("Object Prefabs")]
     public GameObject playerPrefab;
@@ -32,8 +40,10 @@ public class BoardManager : MonoBehaviour
     public TileBase bridgeInactiveTile; // The non-walkable bridge
 
     // The internal "brain" of the board.
+
     private TileData[,] boardData;
     private Dictionary<TileType, TileBase> tileAssetDictionary;
+    private PlayerController playerControllerInstance;
 
     void Awake()
     {
@@ -47,47 +57,91 @@ public class BoardManager : MonoBehaviour
 
     void Start()
     {
-        LoadAndGenerateBoard();
+        // Start the game by loading the first level
+        LoadLevel(0);
     }
 
-    public void LoadAndGenerateBoard()
+    // This is our new public "controller" method.
+    public void LoadLevel(int levelIndex)
     {
-        if (levelJson == null)
+        // --- 1. Cleanup previous level ---
+        if (playerControllerInstance != null)
         {
-            Debug.LogError("No level JSON file assigned!");
+            Destroy(playerControllerInstance.gameObject);
+        }
+        ClearBoardVisuals();
+
+        // --- 2. Set up for the new level ---
+        currentLevelIndex = levelIndex;
+        if (currentLevelIndex >= levelFiles.Count)
+        {
+            Debug.Log("CONGRATULATIONS! You've completed all levels!");
+            // Here you could show a victory screen, etc.
             return;
         }
 
-        LevelData loadedLevel = JsonUtility.FromJson<LevelData>(levelJson.text);
+        TextAsset levelAsset = levelFiles[currentLevelIndex];
+        if (levelAsset == null)
+        {
+            Debug.LogError($"Level file at index {currentLevelIndex} is not assigned!");
+            return;
+        }
+
+        // --- 3. Build the new level ---
+        BuildBoardFromData(levelAsset);
+    }
+
+    // This method now contains the core logic that was in LoadAndGenerateBoard()
+    private void BuildBoardFromData(TextAsset levelAsset)
+    {
+        LevelData loadedLevel = JsonUtility.FromJson<LevelData>(levelAsset.text);
         boardData = new TileData[loadedLevel.width, loadedLevel.height];
+
         Vector2Int startPosition = Vector2Int.zero;
         bool startFound = false;
 
-        // Pass 1: Initialize all tiles and their default states
+        // Pass 1: Initialize tiles
         foreach (var tile in loadedLevel.tiles)
         {
-            if (System.Enum.TryParse(tile.type, true, out TileType parsedType))
+            // First, try to parse the tile type string into an enum
+            if (!System.Enum.TryParse(tile.type, true, out TileType parsedType))
             {
-                tile.tileTypeEnum = parsedType;
-            }
-            else
-            {
-                Debug.LogWarning($"Unknown tile type '{tile.type}' in JSON. Defaulting to Air.");
-                tile.tileTypeEnum = TileType.Air;
+                // If parsing fails, log a warning and skip this tile.
+                Debug.LogWarning($"Unknown tile type '{tile.type}' in JSON at position {tile.position}. Skipping tile.");
+                continue; // Go to the next tile in the loop
             }
 
-            boardData[tile.position.x, tile.position.y] = tile;
+            // If we get here, parsing was successful. Assign the enum.
+            tile.tileTypeEnum = parsedType;
 
-            if (tile.tileTypeEnum == TileType.Bridge) tile.isActive = tile.isBridgeInitiallyActive;
-            if (tile.tileTypeEnum == TileType.Switch) tile.isOn = false; // Switches always start OFF
+            // Now, perform all the logic checks using the confirmed tile.tileTypeEnum
+
+            // Check if this is the start tile
             if (tile.tileTypeEnum == TileType.Start)
             {
                 startPosition = tile.position;
                 startFound = true;
+                // Let's add a log to be 100% sure it's working
+                Debug.Log($"Start tile found at {startPosition}!");
             }
+
+            // Set initial state for bridges
+            if (tile.tileTypeEnum == TileType.Bridge)
+            {
+                tile.isActive = tile.isBridgeInitiallyActive;
+            }
+
+            // Set initial state for switches
+            if (tile.tileTypeEnum == TileType.Switch)
+            {
+                tile.isOn = false;
+            }
+
+            // Finally, place the processed tile data into our 2D grid array
+            boardData[tile.position.x, tile.position.y] = tile;
         }
 
-        // Pass 2: Synchronize all bridges with their controlling switches' initial states
+        // Pass 2: Synchronize bridges
         for (int x = 0; x < loadedLevel.width; x++)
         {
             for (int y = 0; y < loadedLevel.height; y++)
@@ -99,10 +153,11 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        // Generate Visuals & Spawn Player
         DrawEntireBoard();
 
         if (startFound) { SpawnPlayer(startPosition); }
-        else { Debug.LogError("No 'Start' tile found in level data!"); }
+        else { Debug.LogError("No 'Start' tile found!"); }
     }
 
     // --- Public Interaction Methods ---
@@ -110,26 +165,50 @@ public class BoardManager : MonoBehaviour
     public void PlayerLandedOnTile(Vector2Int position)
     {
         TileData tile = GetTileAtPosition(position);
-        if (tile != null && tile.tileTypeEnum == TileType.Switch)
-        {
-            ToggleSwitch(tile);
-        }
-    }
-
-    public bool IsTileWalkable(Vector2Int position)
-    {
-        TileData tile = GetTileAtPosition(position);
-        if (tile == null) return false; // Out of bounds
+        if (tile == null) return;
 
         switch (tile.tileTypeEnum)
         {
+            case TileType.Switch:
+                ToggleSwitch(tile);
+                break;
+            
+            // The Air case is no longer needed here!
+            
+            case TileType.End:
+                Debug.Log("Player reached the end! Loading next level.");
+                LoadNextLevel();
+                break;
+        }
+    }
+
+
+    public MoveResult CheckMove(Vector2Int position)
+    {
+        TileData tile = GetTileAtPosition(position);
+
+        // Case 1: Out of bounds (off the edge)
+        if (tile == null)
+        {
+            return MoveResult.Fall;
+        }
+
+        // Case 2: Check the tile type
+        switch (tile.tileTypeEnum)
+        {
             case TileType.Wall:
+                return MoveResult.Blocked;
+
             case TileType.Air:
-                return false;
+                return MoveResult.Fall;
+
             case TileType.Bridge:
-                return tile.isActive; // Only walkable if active
+                // A bridge is only a success if it's active, otherwise it's a fall
+                return tile.isActive ? MoveResult.Success : MoveResult.Fall;
+
+            // Default case covers Floor, Start, End, Switch
             default:
-                return true; // Floor, Start, End, Switch are all walkable
+                return MoveResult.Success;
         }
     }
 
@@ -166,8 +245,9 @@ public class BoardManager : MonoBehaviour
         if (playerPrefab == null) { Debug.LogError("Player Prefab is not assigned!"); return; }
         Vector3 worldPos = GridToWorldPosition(gridPosition);
         GameObject playerInstance = Instantiate(playerPrefab, worldPos, Quaternion.identity);
-        playerInstance.GetComponent<PlayerController>().Initialize(this, gridPosition);
-        PlayerLandedOnTile(gridPosition); 
+        playerControllerInstance = playerInstance.GetComponent<PlayerController>();
+        playerControllerInstance.Initialize(this, gridPosition);
+        PlayerLandedOnTile(gridPosition);
     }
 
     private void DrawEntireBoard()
@@ -219,19 +299,24 @@ public class BoardManager : MonoBehaviour
         }
         return null;
     }
-    
+
     public Vector3 GridToWorldPosition(Vector2Int gridPosition)
     {
         return baseLayer.GetCellCenterWorld(new Vector3Int(gridPosition.x, gridPosition.y, 0));
     }
-    
+
     private Tilemap GetTilemapForType(TileType type)
     {
         switch (type)
         {
-            case TileType.Floor: case TileType.Wall: case TileType.Air: case TileType.Start: case TileType.End:
+            case TileType.Floor:
+            case TileType.Wall:
+            case TileType.Air:
+            case TileType.Start:
+            case TileType.End:
                 return baseLayer;
-            case TileType.Switch: case TileType.Bridge:
+            case TileType.Switch:
+            case TileType.Bridge:
                 return interactableLayer;
             default:
                 return null;
@@ -242,5 +327,17 @@ public class BoardManager : MonoBehaviour
     {
         baseLayer.ClearAllTiles();
         interactableLayer.ClearAllTiles();
+    }
+
+    public void RestartLevel()
+    {
+        Debug.Log("Restarting current level...");
+        LoadLevel(currentLevelIndex);
+    }
+
+    public void LoadNextLevel()
+    {
+        Debug.Log("Loading next level...");
+        LoadLevel(currentLevelIndex + 1);
     }
 }
