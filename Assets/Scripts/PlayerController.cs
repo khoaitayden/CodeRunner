@@ -1,7 +1,8 @@
 using UnityEngine;
+using System.Collections; // Required for Coroutines
 using System.Collections.Generic;
+using UnityEngine.Events; // Required for UnityEvent
 
-// Enum to represent the four cardinal directions.
 public enum Direction
 {
     North,
@@ -16,9 +17,18 @@ public class PlayerController : MonoBehaviour
     public Vector2Int currentPosition;
     public Direction currentDirection;
 
+    [Header("Execution Settings")]
+    [Tooltip("The delay in seconds between each command execution.")]
+    public float moveDelay = 0.5f;
+
+    [Header("Events")]
+    public UnityEvent OnSequenceStart;
+    public UnityEvent OnSequenceComplete;
+
     private BoardManager boardManager;
     private Dictionary<Direction, Vector2Int> directionVectors;
     private Dictionary<Direction, Quaternion> directionRotations;
+    private bool isExecuting = false;
 
     void Awake()
     {
@@ -49,7 +59,65 @@ public class PlayerController : MonoBehaviour
         transform.rotation = directionRotations[currentDirection];
     }
 
-    // --- COMMAND METHODS ---
+    // --- NEW: The main entry point for running the sequence ---
+    public void RunCommandSequence(List<CommandType> commands)
+    {
+        if (isExecuting)
+        {
+            Debug.LogWarning("Already executing a sequence!");
+            return;
+        }
+        StartCoroutine(ExecuteSequenceCoroutine(commands));
+    }
+
+    private IEnumerator ExecuteSequenceCoroutine(List<CommandType> commands)
+    {
+        isExecuting = true;
+        OnSequenceStart?.Invoke(); // Fire the "started" event
+        Debug.Log("--- SEQUENCE START ---");
+
+        foreach (CommandType command in commands)
+        {
+            // Execute the current command
+            switch (command)
+            {
+                case CommandType.MoveForward:
+                    MoveForward();
+                    break;
+                case CommandType.TurnLeft:
+                    TurnLeft();
+                    break;
+                case CommandType.TurnRight:
+                    TurnRight();
+                    break;
+            }
+
+            // If a move resulted in a fall, isExecuting will have been set to false by HaltExecution.
+            if (!isExecuting)
+            {
+                Debug.Log("--- SEQUENCE HALTED (Level Reset) ---");
+                OnSequenceComplete?.Invoke(); // Re-enable UI
+                yield break;
+            }
+
+            // Wait for the specified delay before the next command
+            yield return new WaitForSeconds(moveDelay);
+        }
+
+        Debug.Log("--- SEQUENCE COMPLETE ---");
+        isExecuting = false;
+        OnSequenceComplete?.Invoke(); // Fire the "completed" event
+    }
+
+    // This method is called by the BoardManager when a level is reset to stop the sequence
+    public void HaltExecution()
+    {
+        isExecuting = false;
+        StopAllCoroutines();
+    }
+
+
+    // --- COMMAND METHODS (Functionally unchanged, but now called by the coroutine) ---
 
     public void TurnLeft()
     {
@@ -68,34 +136,21 @@ public class PlayerController : MonoBehaviour
     public void MoveForward()
     {
         Vector2Int targetPosition = currentPosition + directionVectors[currentDirection];
-        
-        // Ask the board manager for the result of the attempted move
         MoveResult result = boardManager.CheckMove(targetPosition);
 
         switch (result)
         {
             case MoveResult.Success:
-                // Valid move! Update logical position and visuals.
                 currentPosition = targetPosition;
                 UpdateVisuals();
                 Debug.Log("Moved Forward to: " + currentPosition);
-                
-                // Notify the board manager that we have landed on a new tile.
                 boardManager.PlayerLandedOnTile(currentPosition);
                 break;
-
             case MoveResult.Blocked:
-                // The move is blocked by a wall. Do nothing but give feedback.
                 Debug.Log("Move failed. Blocked by a wall.");
-                // Here you could play a "bump" sound or animation.
                 break;
-
             case MoveResult.Fall:
-                // The player tried to move to a hazard tile. Trigger a reset.
                 Debug.Log("Move failed. Fell off the edge, into air, or onto an inactive bridge.");
-                
-                // Optionally, you can play a "fall" animation here before restarting.
-                // For now, we restart immediately.
                 boardManager.RestartLevel();
                 break;
         }
@@ -103,16 +158,7 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateVisuals()
     {
-        // This is an instant snap. Can be replaced with a Coroutine for smooth movement.
         transform.position = boardManager.GridToWorldPosition(currentPosition);
         transform.rotation = directionRotations[currentDirection];
-    }
-
-    // --- TEST CODE (Remove when command system is implemented) ---
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.W)) MoveForward();
-        if (Input.GetKeyDown(KeyCode.A)) TurnLeft();
-        if (Input.GetKeyDown(KeyCode.D)) TurnRight();
     }
 }

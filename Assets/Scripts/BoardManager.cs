@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections;
 using System.Collections.Generic;
 
 // Helper class to link a TileType enum to a TileBase asset in the Inspector for simple tiles.
@@ -20,7 +21,7 @@ public enum MoveResult
 public class BoardManager : MonoBehaviour
 {
     [Header("Level Data")]
-    public List<TextAsset> levelFiles; // ...with this list.
+    public List<TextAsset> levelFiles;
     private int currentLevelIndex = 0;
 
     [Header("Object Prefabs")]
@@ -31,20 +32,25 @@ public class BoardManager : MonoBehaviour
     public Tilemap interactableLayer;
 
     [Header("Tile Assets (Simple)")]
-    public List<TileMapping> tileMappings; // For Floor, Wall, Start, End, Air
+    public List<TileMapping> tileMappings;
 
     [Header("Tile Assets (Stateful)")]
     public TileBase switchOnTile;
     public TileBase switchOffTile;
-    public TileBase bridgeActiveTile;   // The walkable bridge
-    public TileBase bridgeInactiveTile; // The non-walkable bridge
-    public List<TileBase> weakFloorTiles; 
+    public TileBase bridgeActiveTile;
+    public TileBase bridgeInactiveTile;
+    public List<TileBase> weakFloorTiles;
 
-    // The internal "brain" of the board.
+    [Header("Camera Control")]
+    public Camera mainCamera;
+    public RectTransform gameViewPanel;
+    public float boardPadding = 1.1f;
+
+    // Public property to access the current player instance safely
+    public PlayerController PlayerInstance { get; private set; }
 
     private TileData[,] boardData;
     private Dictionary<TileType, TileBase> tileAssetDictionary;
-    private PlayerController playerControllerInstance;
 
     void Awake()
     {
@@ -62,13 +68,13 @@ public class BoardManager : MonoBehaviour
         LoadLevel(0);
     }
 
-    // This is our new public "controller" method.
     public void LoadLevel(int levelIndex)
     {
         // --- 1. Cleanup previous level ---
-        if (playerControllerInstance != null)
+        if (PlayerInstance != null)
         {
-            Destroy(playerControllerInstance.gameObject);
+            PlayerInstance.HaltExecution(); // Stop any running coroutines
+            Destroy(PlayerInstance.gameObject);
         }
         ClearBoardVisuals();
 
@@ -77,7 +83,6 @@ public class BoardManager : MonoBehaviour
         if (currentLevelIndex >= levelFiles.Count)
         {
             Debug.Log("CONGRATULATIONS! You've completed all levels!");
-            // Here you could show a victory screen, etc.
             return;
         }
 
@@ -92,7 +97,6 @@ public class BoardManager : MonoBehaviour
         BuildBoardFromData(levelAsset);
     }
 
-    // This method now contains the core logic that was in LoadAndGenerateBoard()
     private void BuildBoardFromData(TextAsset levelAsset)
     {
         CompactLevelData compactLevel = JsonUtility.FromJson<CompactLevelData>(levelAsset.text);
@@ -105,10 +109,8 @@ public class BoardManager : MonoBehaviour
         // Pass 1: Initialize tiles
         foreach (var tile in loadedLevel.tiles)
         {
-            // The parser now guarantees the 'type' string is valid.
             tile.tileTypeEnum = (TileType)System.Enum.Parse(typeof(TileType), tile.type, true);
 
-            // Set initial state for all tile types that need it
             switch (tile.tileTypeEnum)
             {
                 case TileType.Start:
@@ -125,8 +127,6 @@ public class BoardManager : MonoBehaviour
                     tile.stepsRemaining = tile.initialSteps;
                     break;
             }
-            
-            // Finally, place the processed tile data into our 2D grid array
             boardData[tile.position.x, tile.position.y] = tile;
         }
 
@@ -142,14 +142,19 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        // Generate Visuals & Spawn Player
         DrawEntireBoard();
 
-        if (startFound) { SpawnPlayer(startPosition); }
-        else { Debug.LogError("No 'Start' tile found!"); }
-    }
+        if (startFound)
+        {
+            SpawnPlayer(startPosition);
+        }
+        else
+        {
+            Debug.LogError("No 'Start' tile found!");
+        }
 
-    // --- Public Interaction Methods ---
+        StartCoroutine(FinalizeLevelSetup());
+    }
 
     public void PlayerLandedOnTile(Vector2Int position)
     {
@@ -161,31 +166,23 @@ public class BoardManager : MonoBehaviour
             case TileType.Switch:
                 ToggleSwitch(tile);
                 break;
-
-        case TileType.WeakFloor:
-            if (tile.stepsRemaining > 0)
-            {
-                tile.stepsRemaining--;
-                Debug.Log($"Stepped on Weak Floor at {tile.position}. Steps remaining: {tile.stepsRemaining}");
-
-                if (tile.stepsRemaining == 0)
+            case TileType.WeakFloor:
+                if (tile.stepsRemaining > 0)
                 {
-                    // The floor breaks!
-                    Debug.Log("Weak Floor broke!");
-                    tile.tileTypeEnum = TileType.Air;
-                    UpdateTileVisual(tile); // Update the visual to show the hole
+                    tile.stepsRemaining--;
+                    Debug.Log($"Stepped on Weak Floor at {tile.position}. Steps remaining: {tile.stepsRemaining}");
 
-                    // --- CRITICAL FIX ---
-                    // The player is now on an Air tile, so they must fall.
-                    RestartLevel(); 
-                    return; // Use return to exit the function immediately after a restart.
+                    if (tile.stepsRemaining == 0)
+                    {
+                        Debug.Log("Weak Floor broke!");
+                        tile.tileTypeEnum = TileType.Air;
+                        UpdateTileVisual(tile);
+                        RestartLevel();
+                        return;
+                    }
+                    UpdateTileVisual(tile);
                 }
-                
-                // If it didn't break, just update the visual.
-                UpdateTileVisual(tile);
-            }
-            break;
-
+                break;
             case TileType.End:
                 Debug.Log("Player reached the end! Loading next level.");
                 LoadNextLevel();
@@ -193,41 +190,29 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-
     public MoveResult CheckMove(Vector2Int position)
     {
         TileData tile = GetTileAtPosition(position);
 
-        // Case 1: Out of bounds (off the edge)
         if (tile == null)
         {
             return MoveResult.Fall;
         }
 
-        // Case 2: Check the tile type
         switch (tile.tileTypeEnum)
         {
             case TileType.Wall:
                 return MoveResult.Blocked;
-
             case TileType.Air:
                 return MoveResult.Fall;
-            
-            // NEW CASE
             case TileType.WeakFloor:
-                // It's always a success to step ONTO a weak floor.
-                // The breaking happens *after* you land.
                 return MoveResult.Success;
-
             case TileType.Bridge:
                 return tile.isActive ? MoveResult.Success : MoveResult.Fall;
-
             default:
                 return MoveResult.Success;
         }
     }
-
-    // --- Private State Management ---
 
     private void ToggleSwitch(TileData switchTile)
     {
@@ -253,15 +238,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    // --- Visual and Spawning Methods ---
-
     private void SpawnPlayer(Vector2Int gridPosition)
     {
         if (playerPrefab == null) { Debug.LogError("Player Prefab is not assigned!"); return; }
         Vector3 worldPos = GridToWorldPosition(gridPosition);
         GameObject playerInstance = Instantiate(playerPrefab, worldPos, Quaternion.identity);
-        playerControllerInstance = playerInstance.GetComponent<PlayerController>();
-        playerControllerInstance.Initialize(this, gridPosition);
+        PlayerInstance = playerInstance.GetComponent<PlayerController>();
+        PlayerInstance.Initialize(this, gridPosition);
         PlayerLandedOnTile(gridPosition);
     }
 
@@ -283,13 +266,9 @@ public class BoardManager : MonoBehaviour
     private void UpdateTileVisual(TileData tile)
     {
         Vector3Int tilePosition = new Vector3Int(tile.position.x, tile.position.y, 0);
-
-        // --- CRITICAL FIX ---
-        // First, clear the tile from ALL layers to prevent ghost images.
         baseLayer.SetTile(tilePosition, null);
         interactableLayer.SetTile(tilePosition, null);
 
-        // Now, determine the new tile asset and the correct layer to draw on.
         Tilemap targetMap = GetTilemapForType(tile.tileTypeEnum);
         TileBase tileAsset = null;
 
@@ -302,28 +281,20 @@ public class BoardManager : MonoBehaviour
                 tileAsset = tile.isActive ? bridgeActiveTile : bridgeInactiveTile;
                 break;
             case TileType.WeakFloor:
-                if (weakFloorTiles == null || weakFloorTiles.Count == 0) {
-                    Debug.LogError("WeakFloorTiles list not set up!");
-                    break;
-                }
+                if (weakFloorTiles == null || weakFloorTiles.Count == 0) { Debug.LogError("WeakFloorTiles list not set up!"); break; }
                 int spriteIndex = Mathf.Clamp(tile.stepsRemaining, 0, weakFloorTiles.Count - 1);
                 tileAsset = weakFloorTiles[spriteIndex];
                 break;
-            // The Air type is now handled correctly by the default case
             default:
                 tileAssetDictionary.TryGetValue(tile.tileTypeEnum, out tileAsset);
                 break;
         }
 
-        // Finally, draw the new tile on the correct layer.
-        // If tileAsset is null (like for Air), this correctly erases the tile.
         if (targetMap != null)
         {
             targetMap.SetTile(tilePosition, tileAsset);
         }
     }
-
-    // --- Utility and Helper Methods ---
 
     public TileData GetTileAtPosition(Vector2Int position)
     {
@@ -343,15 +314,9 @@ public class BoardManager : MonoBehaviour
     {
         switch (type)
         {
-            case TileType.Floor:
-            case TileType.Wall:
-            case TileType.Air:
-            case TileType.Start:
-            case TileType.End:
+            case TileType.Floor: case TileType.Wall: case TileType.Air: case TileType.Start: case TileType.End:
                 return baseLayer;
-            case TileType.Switch:
-            case TileType.Bridge:
-            case TileType.WeakFloor: 
+            case TileType.Switch: case TileType.Bridge: case TileType.WeakFloor:
                 return interactableLayer;
             default:
                 return null;
@@ -375,38 +340,42 @@ public class BoardManager : MonoBehaviour
         Debug.Log("Loading next level...");
         LoadLevel(currentLevelIndex + 1);
     }
-    
+
     private LevelData ParseCompactLevelData(CompactLevelData compactData)
     {
         var definitions = new Dictionary<string, TileDefinition>();
-        if (compactData.definitions != null) {
-            foreach (var def in compactData.definitions) {
+        if (compactData.definitions != null)
+        {
+            foreach (var def in compactData.definitions)
+            {
                 definitions[def.key] = def;
             }
         }
 
         var levelData = new LevelData();
-        if (compactData.layout == null || compactData.layout.Count == 0) {
+        if (compactData.layout == null || compactData.layout.Count == 0)
+        {
             levelData.height = 0; levelData.width = 0; return levelData;
         }
 
         levelData.height = compactData.layout.Count;
-        // We will calculate the true grid width dynamically
         int maxGridWidth = 0;
 
         for (int y = 0; y < levelData.height; y++)
         {
             string row = compactData.layout[levelData.height - 1 - y];
-            
-            int gridX = 0; // The logical X-position on our game board
-            int stringX = 0; // The character index in the layout string
+            int gridX = 0;
+            int stringX = 0;
 
             while (stringX < row.Length)
             {
                 string matchedKey = null;
-                foreach (var key in definitions.Keys) {
-                    if (row.Substring(stringX).StartsWith(key)) {
-                        if (matchedKey == null || key.Length > matchedKey.Length) {
+                foreach (var key in definitions.Keys)
+                {
+                    if (row.Substring(stringX).StartsWith(key))
+                    {
+                        if (matchedKey == null || key.Length > matchedKey.Length)
+                        {
                             matchedKey = key;
                         }
                     }
@@ -414,63 +383,96 @@ public class BoardManager : MonoBehaviour
 
                 if (matchedKey != null)
                 {
-                    // We found a multi-character key like "W3".
-                    // It fills ONE grid space.
                     var def = definitions[matchedKey];
-                    TileData tile = new TileData { 
-                        position = new Vector2Int(gridX, y),
-                        type = def.type,
-                        // ... copy all other properties from def ...
-                        switchId = def.switchId,
-                        controlledBySwitchId = def.controlledBySwitchId,
+                    levelData.tiles.Add(new TileData {
+                        position = new Vector2Int(gridX, y), type = def.type,
+                        switchId = def.switchId, controlledBySwitchId = def.controlledBySwitchId,
                         isBridgeInitiallyActive = def.isBridgeInitiallyActive,
-                        activateOnSwitchOn = def.activateOnSwitchOn,
-                        initialSteps = def.initialSteps
-                    };
-                    levelData.tiles.Add(tile);
-                    
-                    // Advance the grid counter by ONE.
-                    gridX++; 
-                    // Advance the string counter by the key's length.
-                    stringX += matchedKey.Length; 
+                        activateOnSwitchOn = def.activateOnSwitchOn, initialSteps = def.initialSteps
+                    });
+                    gridX++;
+                    stringX += matchedKey.Length;
                 }
                 else
                 {
-                    // We found a single character. It also fills ONE grid space.
                     char symbol = row[stringX];
                     string tileType = null;
-                    switch (symbol) {
-                        case '.': tileType = "Floor"; break;
-                        case '#': tileType = "Wall"; break;
-                        case 'S': tileType = "Start"; break;
-                        case 'E': tileType = "End"; break;
+                    switch (symbol)
+                    {
+                        case '.': tileType = "Floor"; break; case '#': tileType = "Wall"; break;
+                        case 'S': tileType = "Start"; break; case 'E': tileType = "End"; break;
                         case ' ': tileType = "Air"; break;
                     }
 
-                    if (tileType != null) {
-                        if (tileType != "Air") {
-                            levelData.tiles.Add(new TileData { 
-                                position = new Vector2Int(gridX, y),
-                                type = tileType 
-                            });
+                    if (tileType != null)
+                    {
+                        if (tileType != "Air")
+                        {
+                            levelData.tiles.Add(new TileData { position = new Vector2Int(gridX, y), type = tileType });
                         }
-                    } else {
+                    }
+                    else
+                    {
                         Debug.LogWarning($"Unrecognized symbol '{symbol}' at string index {stringX} for grid pos ({gridX},{y}).");
                     }
-                    
-                    // Advance BOTH counters by ONE.
                     gridX++;
                     stringX++;
                 }
-                
-                // Keep track of the widest row to set the board dimensions correctly
-                if (gridX > maxGridWidth) {
+
+                if (gridX > maxGridWidth)
+                {
                     maxGridWidth = gridX;
                 }
             }
         }
-        
         levelData.width = maxGridWidth;
         return levelData;
+    }
+
+    private void CenterCameraOnBoard()
+    {
+        if (mainCamera == null || gameViewPanel == null)
+        {
+            Debug.LogError("Main Camera or Game View Panel reference is not set in BoardManager!");
+            return;
+        }
+
+        float boardWidth = boardData.GetLength(0);
+        float boardHeight = boardData.GetLength(1);
+        float panelWidthPixels = gameViewPanel.rect.width;
+        float panelHeightPixels = gameViewPanel.rect.height;
+
+        if (panelWidthPixels <= 0 || panelHeightPixels <= 0) return;
+
+        float boardAspect = boardWidth / boardHeight;
+        float panelAspect = panelWidthPixels / panelHeightPixels;
+
+        if (boardAspect > panelAspect)
+        {
+            mainCamera.orthographicSize = (boardWidth / panelAspect / 2f) * boardPadding;
+        }
+        else
+        {
+            mainCamera.orthographicSize = (boardHeight / 2f) * boardPadding;
+        }
+
+        // --- THE ONLY CORRECTION IS HERE ---
+        // This -0.5f offset centers the camera on the middle of the tiles, not the grid lines.
+        Vector3 boardCenter = new Vector3(boardWidth / 2f+1f, boardHeight / 2f , -10);
+
+        Vector3 panelCenterScreen = gameViewPanel.position;
+        Vector3 screenCenterScreen = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
+        Vector3 screenOffset = panelCenterScreen - screenCenterScreen;
+
+        float worldUnitsPerPixel = (mainCamera.orthographicSize * 2) / Screen.height;
+        Vector3 worldOffset = new Vector3(screenOffset.x * worldUnitsPerPixel, screenOffset.y * worldUnitsPerPixel, 0);
+
+        mainCamera.transform.position = boardCenter - worldOffset;
+    }
+    
+    private IEnumerator FinalizeLevelSetup()
+    {
+        yield return null;
+        CenterCameraOnBoard();
     }
 }
