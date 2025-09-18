@@ -12,10 +12,10 @@ public class UIManager : MonoBehaviour
     public GameObject moveForwardCardPrefab;
     public GameObject turnLeftCardPrefab;
     public GameObject turnRightCardPrefab;
-    
+
     public Transform sequenceGridParent;
     public Transform availableCommandsParent;
-    
+
     [Header("Controls")]
     public Button runButton;
     public Button resetButton;
@@ -34,18 +34,19 @@ public class UIManager : MonoBehaviour
             GameObject slotGO = Instantiate(commandSlotPrefab, sequenceGridParent);
             commandSlots.Add(slotGO.GetComponent<CommandSlot>());
         }
-        
+
         Instantiate(moveForwardCardPrefab, availableCommandsParent);
         Instantiate(turnLeftCardPrefab, availableCommandsParent);
         Instantiate(turnRightCardPrefab, availableCommandsParent);
-        
+
         runButton.onClick.AddListener(OnRunClicked);
+        resetButton.onClick.AddListener(OnResetClicked);
     }
-    
+
     private void OnRunClicked()
     {
         List<CommandType> commandSequence = ReadCommandSequence();
-        
+
         if (commandSequence.Count == 0)
         {
             Debug.Log("Command sequence is empty.");
@@ -83,9 +84,27 @@ public class UIManager : MonoBehaviour
     // --- NEW: Public method to be called by UnityEvents ---
     public void SetRunButtonInteractable(bool isInteractable)
     {
-        if(runButton != null)
+        if (runButton != null)
         {
             runButton.interactable = isInteractable;
         }
+    }
+    public void ClearCommandSlots()
+    {
+        Debug.Log("Clearing all command slots.");
+        foreach (CommandSlot slot in commandSlots)
+        {
+            // Check if the slot has a card in it (a child object)
+            if (slot.transform.childCount > 0)
+            {
+                // Destroy the card GameObject
+                Destroy(slot.transform.GetChild(0).gameObject);
+            }
+        }
+    }
+
+    private void OnResetClicked()
+    {
+        ClearCommandSlots();
     }
 }

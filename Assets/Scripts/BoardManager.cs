@@ -45,6 +45,8 @@ public class BoardManager : MonoBehaviour
     public Camera mainCamera;
     public RectTransform gameViewPanel;
     public float boardPadding = 1.1f;
+    [Header("System References")]
+    public UIManager uiManager;
 
     // Public property to access the current player instance safely
     public PlayerController PlayerInstance { get; private set; }
@@ -70,6 +72,15 @@ public class BoardManager : MonoBehaviour
 
     public void LoadLevel(int levelIndex)
     {
+        if (levelIndex != currentLevelIndex)
+        {
+            // This is a new level (e.g., from Start or LoadNextLevel).
+            // We should clear the command slots.
+            if (uiManager != null)
+            {
+                uiManager.ClearCommandSlots();
+            }
+        }
         // --- 1. Cleanup previous level ---
         if (PlayerInstance != null)
         {
@@ -458,7 +469,7 @@ public class BoardManager : MonoBehaviour
 
         // --- THE ONLY CORRECTION IS HERE ---
         // This -0.5f offset centers the camera on the middle of the tiles, not the grid lines.
-        Vector3 boardCenter = new Vector3(boardWidth / 2f+1f, boardHeight / 2f , -10);
+        Vector3 boardCenter = new Vector3(boardWidth / 2f, boardHeight / 2f , -10);
 
         Vector3 panelCenterScreen = gameViewPanel.position;
         Vector3 screenCenterScreen = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
