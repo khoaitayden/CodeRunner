@@ -108,7 +108,8 @@ MonoBehaviour:
   - {fileID: -8189467732115575723, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
   - {fileID: 9152695889459582265, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
   - {fileID: 9041673867348659178, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
-  moveDelay: 0.5
+  animator: {fileID: 7775572113483106245}
+  moveDelay: 0.3
   moveCount: 0
   OnSequenceStart:
     m_PersistentCalls:
@@ -132,7 +133,7 @@ Animator:
   m_GameObject: {fileID: 6724069641675009704}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8d565d79bdb0e5d4487bfd51b333cfbe, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

@@ -14,6 +14,7 @@ public class LoopPanelController : MonoBehaviour
     private List<CommandSlot> subCommandSlots = new List<CommandSlot>();
     void Awake()
     {
+        repeatInput.text = "0"; 
         // --- NEW: Automatically find the command slots ---
         if (subSlotsParent != null)
         {
@@ -81,6 +82,7 @@ public class LoopPanelController : MonoBehaviour
     
     public void ClearSubSlots()
     {
+        repeatInput.text = "0"; 
         // This logic is the same as clearing the main slots, but for our sub-slots.
         foreach (CommandSlot slot in subCommandSlots)
         {

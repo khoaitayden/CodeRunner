@@ -3,20 +3,19 @@ using System.Collections; // Required for Coroutines
 using System.Collections.Generic;
 using UnityEngine.Events; // Required for UnityEvent
 
-public enum Direction { Down, Left, Up, Right}
+public enum Direction { Up, Right, Down, Left }
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Player State")]
     public Vector2Int currentPosition;
     public Direction currentDirection;
-    [Tooltip("Sprites for each direction: Up, Right, Down, Left")]
-    public List<Sprite> directionSprites; 
+    public Direction previousDirection;
+    public Animator animator;
 
-    
     [Header("Execution Settings")]
     [Tooltip("The delay in seconds between each command execution.")]
-    public float moveDelay = 0.5f;
+    public float moveDelay;
     [HideInInspector] public int moveCount = 0;
     [Header("Events")]
     public UnityEvent OnSequenceStart;
@@ -44,7 +43,7 @@ public class PlayerController : MonoBehaviour
             { Direction.Up, Quaternion.Euler(0, 0, 0) },
             { Direction.Right,  Quaternion.Euler(0, 0, -90) },
             { Direction.Down, Quaternion.Euler(0, 0, 180) },
-            { Direction.Left,  Quaternion.Euler(0, 0, 90) }
+            { Direction.Left,  Quaternion.Euler(0, 0, 270) } // Or 90, depending on your sprite's default orientation
         };
     }
 
@@ -53,8 +52,12 @@ public class PlayerController : MonoBehaviour
         boardManager = manager;
         currentPosition = startPosition;
         currentDirection = Direction.Up;
+        previousDirection = currentDirection;
         transform.position = boardManager.GridToWorldPosition(currentPosition);
         transform.rotation = directionRotations[currentDirection];
+        UpdateVisuals();
+        moveCount = 0;
+        OnStepTaken?.Invoke(moveCount);
     }
 
     public void RunCommandSequence(List<Command> commands)
@@ -64,8 +67,6 @@ public class PlayerController : MonoBehaviour
             Debug.LogWarning("Already executing a sequence!");
             return;
         }
-        moveCount = 0;
-        OnStepTaken?.Invoke(moveCount);
         StartCoroutine(ExecuteSequenceCoroutine(commands));
     }
 
@@ -77,7 +78,7 @@ public class PlayerController : MonoBehaviour
 
         // Delegate the actual execution to our recursive helper coroutine
         yield return StartCoroutine(ExecuteCommands(commands));
-        
+
         // This code runs only after the entire sequence is complete
         isExecuting = false;
         CheckFinalPosition();
@@ -112,7 +113,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    
+
     private void ExecuteSimpleCommand(CommandType type)
     {
         switch (type)
@@ -142,7 +143,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator DelayedRestart()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.5f);
         if (boardManager != null) boardManager.RestartLevel();
     }
 
@@ -182,24 +183,25 @@ public class PlayerController : MonoBehaviour
 
     public void TurnLeft()
     {
-        currentDirection = (Direction)(((int)currentDirection + 3) % 4);
+        // Up(0)->Left(3), Right(1)->Up(0), Down(2)->Right(1), Left(3)->Down(2)
+        currentDirection = (Direction)(((int)currentDirection + 3) % 4); 
         UpdateVisuals();
-        Debug.Log("Turned Left. New direction: " + currentDirection);
     }
 
     public void TurnRight()
     {
-        currentDirection = (Direction)(((int)currentDirection + 1) % 4);
+        // Up(0)->Right(1), Right(1)->Down(2), etc.
+        currentDirection = (Direction)(((int)currentDirection + 1) % 4); 
         UpdateVisuals();
-        Debug.Log("Turned Right. New direction: " + currentDirection);
     }
 
     private void UpdateVisuals()
     {
         transform.position = new Vector3(boardManager.GridToWorldPosition(currentPosition).x, boardManager.GridToWorldPosition(currentPosition).y + 0.3f, transform.position.z);
-        if (directionSprites != null && directionSprites.Count == 4)
-        {
-            GetComponent<SpriteRenderer>().sprite = directionSprites[(int)currentDirection];
-        }
+
+        animator.SetInteger("FacingDirection", (int)currentDirection);
     }
+
+
+
 }
