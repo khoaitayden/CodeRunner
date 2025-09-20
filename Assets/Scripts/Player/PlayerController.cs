@@ -98,8 +98,6 @@ public class PlayerController : MonoBehaviour
                 Debug.Log($"--- Starting Loop (x{command.RepeatCount}) ---");
                 for (int i = 0; i < command.RepeatCount; i++)
                 {
-                    moveCount++;
-                    OnStepTaken?.Invoke(moveCount);
                     yield return StartCoroutine(ExecuteCommands(command.SubCommands));
                     if (!isExecuting) yield break; // Stop immediately if a sub-command failed
                 }
