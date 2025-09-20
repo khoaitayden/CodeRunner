@@ -62,17 +62,13 @@ public class BoardManager : MonoBehaviour
         foreach (var mapping in tileMappings)
         {
             tileAssetDictionary[mapping.type] = mapping.tileAsset;
-        }
-    }
-
-    void Start()
-    {
-        // Start the game by loading the first level
+        }       
         LoadLevel(0);
     }
-
+    
     public void LoadLevel(int levelIndex)
     {
+        Debug.Log($"Loading Level {levelIndex}...");
         gamePlayUIManager.UpdateCurrentLevelText(levelIndex + 1);
         if (levelIndex != currentLevelIndex)
         {
@@ -163,8 +159,8 @@ public class BoardManager : MonoBehaviour
         {
             Debug.LogError("No 'Start' tile found!");
         }
-
-        StartCoroutine(FinalizeLevelSetup());
+        Debug.Log("Level loaded successfully.");
+        FinalizeLevelSetup();
     }
 
     public void PlayerLandedOnTile(Vector2Int position)
@@ -463,7 +459,7 @@ public class BoardManager : MonoBehaviour
             Debug.LogError("Main Camera or Game View Panel reference is not set in BoardManager!");
             return;
         }
-
+        Debug.Log("Centering camera on board...");
         float boardWidth = boardData.GetLength(0);
         float boardHeight = boardData.GetLength(1);
         float panelWidthPixels = gameViewPanel.rect.width;
@@ -497,9 +493,10 @@ public class BoardManager : MonoBehaviour
         mainCamera.transform.position = boardCenter - worldOffset;
     }
     
-    private IEnumerator FinalizeLevelSetup()
+    private void FinalizeLevelSetup()
     {
-        yield return null;
+        
+        Debug.Log("Finalizing level setup and centering camera...");
         CenterCameraOnBoard();
     }
 }

@@ -25,7 +25,7 @@ public class GamePlayUIManager : MonoBehaviour
     [Header("Gameplay UI")]
     public TextMeshProUGUI stepCountText;
     public TextMeshProUGUI currentLevelText;
-    public TMP_InputField playerNameInput;
+    public TextMeshProUGUI playerNameText;
 
     [Header("Settings")]
     public int mainSlotCount = 12;
@@ -43,16 +43,18 @@ public class GamePlayUIManager : MonoBehaviour
     {
         SetupUI();
 
-        // The GameDataManager now handles creating new data automatically.
-        // We just need to read it.
+        // --- REFACTORED LOGIC ---
         if (GameDataManager.Instance != null)
         {
-            // Display the default data for this new session
-            playerNameInput.text = GameDataManager.Instance.currentSessionData.playerName;
-            UpdateTotalStepCount(); // This will show "Total Steps: 0"
+            // Read the name set in the main menu and display it
+            playerNameText.text = GameDataManager.Instance.currentSessionData.playerName;
+            historicalStepTotal = GameDataManager.Instance.currentSessionData.totalSteps;
+            UpdateStepDisplay(0);
         }
-
-        playerNameInput.onEndEdit.AddListener(OnPlayerNameChanged);
+        
+        // --- REMOVE THIS ---
+        // We no longer need to listen for the input field's changes here.
+        // playerNameInput.onEndEdit.AddListener(OnPlayerNameChanged);
     }
 
     void OnDestroy()
@@ -210,13 +212,6 @@ public class GamePlayUIManager : MonoBehaviour
         currentLevelText.text = "Level: " + level;
     }
 
-    private void OnPlayerNameChanged(string newName)
-    {
-        if (GameDataManager.Instance != null)
-        {
-            GameDataManager.Instance.SetPlayerName(newName);
-        }
-    }
 
     public void UpdateTotalStepCount()
     {
