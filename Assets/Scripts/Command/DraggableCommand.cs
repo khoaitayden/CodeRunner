@@ -3,16 +3,18 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 public enum CommandType
 {
-    None, 
+    None,
     MoveForward,
     TurnLeft,
-    TurnRight
+    TurnRight,
+    Loop
 }
 public class DraggableCommand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public CommandType commandType;
     [Tooltip("Is this an infinite source card in the palette?")]
     public bool isSourceCard = false;
+    public int loopID = 0;
 
     private Transform originalParent;
     private CanvasGroup canvasGroup;
@@ -21,6 +23,11 @@ public class DraggableCommand : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
+        // --- ADD THIS SAFETY CHECK ---
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
         layoutElement = GetComponent<LayoutElement>();
     }
 

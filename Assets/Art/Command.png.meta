@@ -125,10 +125,10 @@ TextureImporter:
       name: Command_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 17
-        height: 17
+        x: 1
+        y: 1
+        width: 15
+        height: 15
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -147,10 +147,10 @@ TextureImporter:
       name: Command_1
       rect:
         serializedVersion: 2
-        x: 18
-        y: 1
-        width: 15
-        height: 15
+        x: 19
+        y: 2
+        width: 13
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -169,10 +169,10 @@ TextureImporter:
       name: Command_2
       rect:
         serializedVersion: 2
-        x: 35
-        y: 1
-        width: 15
-        height: 15
+        x: 36
+        y: 2
+        width: 13
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -191,10 +191,10 @@ TextureImporter:
       name: Command_3
       rect:
         serializedVersion: 2
-        x: 52
-        y: 1
-        width: 15
-        height: 15
+        x: 53
+        y: 2
+        width: 13
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -209,11 +209,77 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Command_4
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 2
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52c55d10dde98e440ad138a42e7e6396
+      internalID: -667528994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Command_5
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 2
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96980d719f12ab44f810267c8fbd0aab
+      internalID: 1353082735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Command_6
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 2
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08228affb52133b4599e70ecbe2538b1
+      internalID: -1316290199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: ef606e9d29ce406489b2b2166a00ff00
     internalID: 0
     vertices: []
     indices: 
@@ -227,6 +293,9 @@ TextureImporter:
       Command_1: 3329955356560496613
       Command_2: -3021789074819707873
       Command_3: 1243806566613869620
+      Command_4: -667528994
+      Command_5: 1353082735
+      Command_6: -1316290199
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

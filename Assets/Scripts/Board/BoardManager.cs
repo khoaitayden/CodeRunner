@@ -74,8 +74,6 @@ public class BoardManager : MonoBehaviour
     {
         if (levelIndex != currentLevelIndex)
         {
-            // This is a new level (e.g., from Start or LoadNextLevel).
-            // We should clear the command slots.
             if (uiManager != null)
             {
                 uiManager.ClearCommandSlots();
