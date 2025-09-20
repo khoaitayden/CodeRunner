@@ -47,6 +47,7 @@ public class BoardManager : MonoBehaviour
     public float boardPadding = 1.1f;
     [Header("System References")]
     public UIManager uiManager;
+    [Header("System References")]
 
     // Public property to access the current player instance safely
     public PlayerController PlayerInstance { get; private set; }
@@ -72,6 +73,7 @@ public class BoardManager : MonoBehaviour
 
     public void LoadLevel(int levelIndex)
     {
+        uiManager.UpdateCurrentLevelText(levelIndex + 1);
         if (levelIndex != currentLevelIndex)
         {
             if (uiManager != null)
@@ -347,6 +349,22 @@ public class BoardManager : MonoBehaviour
     public void LoadNextLevel()
     {
         Debug.Log("Loading next level...");
+        
+        if (GameDataManager.Instance != null && PlayerInstance != null)
+        {
+            int levelNumberPassed = currentLevelIndex + 1; 
+            int stepsTaken = PlayerInstance.moveCount;
+            
+            GameDataManager.Instance.UpdateProgress(levelNumberPassed, stepsTaken);
+
+            // --- THIS IS THE FIX ---
+            // After updating the data, tell the UI to refresh its display.
+            if (uiManager != null)
+            {
+                uiManager.UpdateTotalStepCount();
+            }
+        }
+        
         LoadLevel(currentLevelIndex + 1);
     }
 

@@ -21,12 +21,12 @@ public class PlayerController : MonoBehaviour
     public UnityEvent OnSequenceStart;
     public UnityEvent OnSequenceComplete; // Fired on success
     public UnityEvent OnSequenceFail;     // Fired on failure (e.g., finishing in the wrong spot)
+    public UnityEvent<int> OnStepTaken;
 
     private BoardManager boardManager;
     private Dictionary<Direction, Vector2Int> directionVectors;
     private Dictionary<Direction, Quaternion> directionRotations;
     private bool isExecuting = false;
-    public UnityEvent<int> OnStepTaken;
 
     void Awake()
     {
@@ -57,7 +57,6 @@ public class PlayerController : MonoBehaviour
         transform.rotation = directionRotations[currentDirection];
         UpdateVisuals();
         moveCount = 0;
-        OnStepTaken?.Invoke(moveCount);
     }
 
     public void RunCommandSequence(List<Command> commands)

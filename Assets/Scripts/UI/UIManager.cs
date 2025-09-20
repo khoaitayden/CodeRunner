@@ -24,6 +24,8 @@ public class UIManager : MonoBehaviour
 
     [Header("Gameplay UI")]
     public TextMeshProUGUI stepCountText;
+    public TextMeshProUGUI currentLevelText;
+    public TMP_InputField playerNameInput;
 
     [Header("Settings")]
     public int mainSlotCount = 12;
@@ -31,24 +33,35 @@ public class UIManager : MonoBehaviour
     public GameObject loopPanelPrefab;
     public Transform loopSectionParent;
     public int numberOfLoops = 3;
-    private PlayerController player;
-    public List<Sprite> loopIconSprites; 
-
+    private PlayerController currentPlayer;
+    public List<Sprite> loopIconSprites;
     private List<LoopPanelController> loopPanels = new List<LoopPanelController>();
     private List<CommandSlot> mainCommandSlots = new List<CommandSlot>();
+    private int historicalStepTotal = 0;
 
     void Start()
     {
         SetupUI();
-    }
-    void OnDestroy()
-    {
-        if (player != null)
+
+        // The GameDataManager now handles creating new data automatically.
+        // We just need to read it.
+        if (GameDataManager.Instance != null)
         {
-            player.OnStepTaken.RemoveListener(UpdateStepCount);
+            // Display the default data for this new session
+            playerNameInput.text = GameDataManager.Instance.currentSessionData.playerName;
+            UpdateTotalStepCount(); // This will show "Total Steps: 0"
         }
+
+        playerNameInput.onEndEdit.AddListener(OnPlayerNameChanged);
     }
 
+    void OnDestroy()
+    {
+        if (currentPlayer != null)
+        {
+            currentPlayer.OnStepTaken.RemoveListener(UpdateStepDisplay);
+        }
+    }
     private void SetupUI()
     {
         // 1. Create the main command slots in the grid
@@ -90,26 +103,34 @@ public class UIManager : MonoBehaviour
 
     private void OnRunClicked()
     {
-        List<Command> commandSequence = ReadCommandSequence();
-
+        // --- SUBSCRIBE TO THE PLAYER'S EVENTS ---
         if (boardManager.PlayerInstance != null)
         {
-            if (player != boardManager.PlayerInstance) // Only subscribe once or if changed
+            // If the player has changed (e.g., new level), re-subscribe
+            if (currentPlayer != boardManager.PlayerInstance)
             {
-                if (player != null)
-                    player.OnStepTaken.RemoveListener(UpdateStepCount);
+                if (currentPlayer != null)
+                    currentPlayer.OnStepTaken.RemoveListener(UpdateStepDisplay);
 
-                player = boardManager.PlayerInstance;
-                player.OnStepTaken.AddListener(UpdateStepCount);
+                currentPlayer = boardManager.PlayerInstance;
+                currentPlayer.OnStepTaken.AddListener(UpdateStepDisplay);
             }
-            boardManager.PlayerInstance.RunCommandSequence(commandSequence);
+
+            // Now run the sequence
+            List<Command> commandSequence = ReadCommandSequence();
+            currentPlayer.RunCommandSequence(commandSequence);
         }
-        else
+    }
+    public void UpdateStepDisplay(int currentAttemptSteps)
+    {
+        if (stepCountText != null)
         {
-            Debug.LogError("Player instance not found! Cannot run sequence.");
+            int displayTotal = historicalStepTotal + currentAttemptSteps;
+            stepCountText.text = "Steps: " + displayTotal;
         }
     }
 
+    // This is called by the Reset button in the UI
     private void OnResetClicked()
     {
         ClearAllCommandSlots();
@@ -183,13 +204,25 @@ public class UIManager : MonoBehaviour
     {
         runButton.interactable = isInteractable;
     }
-    
-    public void UpdateStepCount(int count)
+
+    public void UpdateCurrentLevelText(int level)
     {
-        if (stepCountText != null)
+        currentLevelText.text = "Level: " + level;
+    }
+
+    private void OnPlayerNameChanged(string newName)
+    {
+        if (GameDataManager.Instance != null)
         {
-            stepCountText.text = "Steps: " + count;
-            Debug.Log("Step count updated to: " + count);
+            GameDataManager.Instance.SetPlayerName(newName);
+        }
+    }
+
+    public void UpdateTotalStepCount()
+    {
+        if (stepCountText != null && GameDataManager.Instance != null)
+        {
+            stepCountText.text = "Steps: " + GameDataManager.Instance.currentSessionData.totalSteps;
         }
     }
 }
