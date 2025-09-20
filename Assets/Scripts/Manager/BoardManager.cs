@@ -46,7 +46,7 @@ public class BoardManager : MonoBehaviour
     public RectTransform gameViewPanel;
     public float boardPadding = 1.1f;
     [Header("System References")]
-    public UIManager uiManager;
+    public GamePlayUIManager gamePlayUIManager;
     [Header("System References")]
 
     // Public property to access the current player instance safely
@@ -73,12 +73,12 @@ public class BoardManager : MonoBehaviour
 
     public void LoadLevel(int levelIndex)
     {
-        uiManager.UpdateCurrentLevelText(levelIndex + 1);
+        gamePlayUIManager.UpdateCurrentLevelText(levelIndex + 1);
         if (levelIndex != currentLevelIndex)
         {
-            if (uiManager != null)
+            if (gamePlayUIManager != null)
             {
-                uiManager.ClearAllCommandSlots();
+                gamePlayUIManager.ClearAllCommandSlots();
             }
         }
         // --- 1. Cleanup previous level ---
@@ -343,9 +343,10 @@ public class BoardManager : MonoBehaviour
     public void RestartLevel()
     {
         Debug.Log("Restarting current level...");
-        LoadLevel(currentLevelIndex);
+        // Instead of calling LoadLevel directly, we play a transition.
+        // The "() =>" part is a lambda function, a clean way to pass a method call as a parameter.
+        TransitionManager.Instance.PlayTransition(() => LoadLevel(currentLevelIndex));
     }
-
     public void LoadNextLevel()
     {
         Debug.Log("Loading next level...");
@@ -359,13 +360,12 @@ public class BoardManager : MonoBehaviour
 
             // --- THIS IS THE FIX ---
             // After updating the data, tell the UI to refresh its display.
-            if (uiManager != null)
+            if (gamePlayUIManager != null)
             {
-                uiManager.UpdateTotalStepCount();
+                gamePlayUIManager.UpdateTotalStepCount();
             }
         }
-        
-        LoadLevel(currentLevelIndex + 1);
+        TransitionManager.Instance.PlayTransition(() => LoadLevel(currentLevelIndex + 1));
     }
 
     private LevelData ParseCompactLevelData(CompactLevelData compactData)

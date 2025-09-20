@@ -136,15 +136,10 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("--- SEQUENCE FAILED (Not on End tile) ---");
             OnSequenceFail?.Invoke();
-            StartCoroutine(DelayedRestart());
+            TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
         }
     }
-
-    private IEnumerator DelayedRestart()
-    {
-        yield return new WaitForSeconds(0.5f);
-        if (boardManager != null) boardManager.RestartLevel();
-    }
+    
 
     /// <summary>
     /// Called by the BoardManager during a level reset to stop any running coroutines.
