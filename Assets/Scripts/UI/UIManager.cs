@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -12,29 +13,40 @@ public class UIManager : MonoBehaviour
     public GameObject moveForwardCardPrefab;
     public GameObject turnLeftCardPrefab;
     public GameObject turnRightCardPrefab;
-    
+
     [Header("UI Parents")]
     public Transform sequenceGridParent;
     public Transform availableCommandsParent;
-    
+
     [Header("Controls")]
     public Button runButton;
     public Button resetButton;
-    
+
+    [Header("Gameplay UI")]
+    public TextMeshProUGUI stepCountText;
+
     [Header("Settings")]
     public int mainSlotCount = 12;
     [Header("Loop UI")]
     public GameObject loopPanelPrefab;
     public Transform loopSectionParent;
     public int numberOfLoops = 3;
-    public List<Sprite> loopIconSprites; // --- ADD THIS LIST ---
-    
+    private PlayerController player;
+    public List<Sprite> loopIconSprites; 
+
     private List<LoopPanelController> loopPanels = new List<LoopPanelController>();
     private List<CommandSlot> mainCommandSlots = new List<CommandSlot>();
 
     void Start()
     {
         SetupUI();
+    }
+    void OnDestroy()
+    {
+        if (player != null)
+        {
+            player.OnStepTaken.RemoveListener(UpdateStepCount);
+        }
     }
 
     private void SetupUI()
@@ -58,11 +70,11 @@ public class UIManager : MonoBehaviour
 
             GameObject loopGO = Instantiate(loopPanelPrefab, loopSectionParent);
             var controller = loopGO.GetComponent<LoopPanelController>();
-            
+
             // --- CHANGE THIS LINE ---
             // controller.Initialize(i + 1);
             controller.Initialize(i + 1, loopIconSprites[i]); // Pass the sprite
-            
+
             loopPanels.Add(controller);
         }
 
@@ -75,13 +87,21 @@ public class UIManager : MonoBehaviour
         runButton.onClick.AddListener(OnRunClicked);
         resetButton.onClick.AddListener(OnResetClicked);
     }
-    
+
     private void OnRunClicked()
     {
         List<Command> commandSequence = ReadCommandSequence();
-        
+
         if (boardManager.PlayerInstance != null)
         {
+            if (player != boardManager.PlayerInstance) // Only subscribe once or if changed
+            {
+                if (player != null)
+                    player.OnStepTaken.RemoveListener(UpdateStepCount);
+
+                player = boardManager.PlayerInstance;
+                player.OnStepTaken.AddListener(UpdateStepCount);
+            }
             boardManager.PlayerInstance.RunCommandSequence(commandSequence);
         }
         else
@@ -89,10 +109,10 @@ public class UIManager : MonoBehaviour
             Debug.LogError("Player instance not found! Cannot run sequence.");
         }
     }
-    
+
     private void OnResetClicked()
     {
-        ClearCommandSlots();
+        ClearAllCommandSlots();
     }
 
     /// <summary>
@@ -131,19 +151,28 @@ public class UIManager : MonoBehaviour
         }
         return sequence;
     }
-    
+
     /// <summary>
     /// Clears all cards from the main sequence grid, but leaves loop panels and the palette untouched.
     /// </summary>
-    public void ClearCommandSlots()
+    public void ClearAllCommandSlots()
     {
-        Debug.Log("Clearing all main command slots.");
+        // 1. Clear the main command slots (This part is unchanged)
+        Debug.Log("Clearing all MAIN command slots.");
         foreach (CommandSlot slot in mainCommandSlots)
         {
             if (slot.transform.childCount > 0)
             {
                 Destroy(slot.transform.GetChild(0).gameObject);
             }
+        }
+
+        // --- 2. NEW: Clear all the loop sub-slots ---
+        Debug.Log("Clearing all LOOP command slots.");
+        foreach (LoopPanelController panel in loopPanels)
+        {
+            // Tell each loop panel to clear itself.
+            panel.ClearSubSlots();
         }
     }
 
@@ -153,5 +182,14 @@ public class UIManager : MonoBehaviour
     public void SetRunButtonInteractable(bool isInteractable)
     {
         runButton.interactable = isInteractable;
+    }
+    
+    public void UpdateStepCount(int count)
+    {
+        if (stepCountText != null)
+        {
+            stepCountText.text = "Steps: " + count;
+            Debug.Log("Step count updated to: " + count);
+        }
     }
 }

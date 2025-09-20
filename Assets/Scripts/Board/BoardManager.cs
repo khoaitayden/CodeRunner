@@ -76,7 +76,7 @@ public class BoardManager : MonoBehaviour
         {
             if (uiManager != null)
             {
-                uiManager.ClearCommandSlots();
+                uiManager.ClearAllCommandSlots();
             }
         }
         // --- 1. Cleanup previous level ---

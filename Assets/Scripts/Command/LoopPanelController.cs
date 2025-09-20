@@ -8,7 +8,7 @@ public class LoopPanelController : MonoBehaviour
     [Header("References")]
     public TMP_InputField repeatInput;
     public DraggableCommand loopCardIcon;
-    public Image loopIconImage; 
+    public Image loopIconImage;
     public Transform subSlotsParent;
 
     private List<CommandSlot> subCommandSlots = new List<CommandSlot>();
@@ -70,12 +70,24 @@ public class LoopPanelController : MonoBehaviour
             SubCommands = subCommands
         };
     }
-    
+
     public void InputVaidation()
     {
         if (repeatInput.text.Length > 2)
         {
             repeatInput.text = repeatInput.text.Remove(2, repeatInput.text.Length - 2);
+        }
+    }
+    
+    public void ClearSubSlots()
+    {
+        // This logic is the same as clearing the main slots, but for our sub-slots.
+        foreach (CommandSlot slot in subCommandSlots)
+        {
+            if (slot.transform.childCount > 0)
+            {
+                Destroy(slot.transform.GetChild(0).gameObject);
+            }
         }
     }
 }

@@ -57,9 +57,6 @@ public class PlayerController : MonoBehaviour
         transform.rotation = directionRotations[currentDirection];
     }
 
-    /// <summary>
-    /// The main public entry point to start executing a program.
-    /// </summary>
     public void RunCommandSequence(List<Command> commands)
     {
         if (isExecuting)
@@ -72,9 +69,6 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(ExecuteSequenceCoroutine(commands));
     }
 
-    /// <summary>
-    /// This coroutine manages the overall start and end of the sequence.
-    /// </summary>
     private IEnumerator ExecuteSequenceCoroutine(List<Command> commands)
     {
         isExecuting = true;
@@ -113,7 +107,8 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                // It's a simple command.
+                moveCount++;
+                OnStepTaken?.Invoke(moveCount);
                 ExecuteSimpleCommand(command.Type);
                 yield return new WaitForSeconds(moveDelay);
             }
@@ -168,7 +163,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2Int targetPosition = currentPosition + directionVectors[currentDirection];
         MoveResult result = boardManager.CheckMove(targetPosition);
-        
+
         switch (result)
         {
             case MoveResult.Success:
@@ -189,8 +184,6 @@ public class PlayerController : MonoBehaviour
 
     public void TurnLeft()
     {
-        moveCount++;
-        OnStepTaken?.Invoke(moveCount);
         currentDirection = (Direction)(((int)currentDirection + 3) % 4);
         UpdateVisuals();
         Debug.Log("Turned Left. New direction: " + currentDirection);
@@ -198,8 +191,6 @@ public class PlayerController : MonoBehaviour
 
     public void TurnRight()
     {
-        moveCount++;
-        OnStepTaken?.Invoke(moveCount);
         currentDirection = (Direction)(((int)currentDirection + 1) % 4);
         UpdateVisuals();
         Debug.Log("Turned Right. New direction: " + currentDirection);
