@@ -26,32 +26,20 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGame()
     {
-        // 1. Get the player name from the input field
         string playerName = playerNameInput.text;
 
-        // 2. Provide a default name if the input is empty
-        if (string.IsNullOrWhiteSpace(playerName))
-        {
-            playerName = "Player";
-        }
-
-        // 3. Save the name using our persistent GameDataManager
-        if (GameDataManager.Instance != null)
+       if (GameDataManager.Instance != null)
         {
             GameDataManager.Instance.SetPlayerName(playerName);
         }
 
-        // 4. Use the TransitionManager to load the gameplay scene
         if (TransitionManager.Instance != null)
         {
-            // This plays the fade-to-black, then loads the scene, then fades back in.
-            TransitionManager.Instance.PlayTransition(() => SceneManager.LoadScene(gameplaySceneName));
+            TransitionManager.Instance.TransitionToScene(gameplaySceneName);
         }
         else
         {
-            // Fallback if the transition manager isn't in the scene
             SceneManager.LoadScene(gameplaySceneName);
-            
         }
     }
 }

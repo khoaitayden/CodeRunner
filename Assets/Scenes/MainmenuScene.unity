@@ -2335,6 +2335,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ScreenTransition
       objectReference: {fileID: 0}
+    - target: {fileID: 6825949831906555555, guid: ff91c6fa55fe5384587ab0e6cc2c1bf0, type: 3}
+      propertyPath: fadeDuration
+      value: 0.7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

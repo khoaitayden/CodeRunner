@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement; 
 
 public class GamePlayUIManager : MonoBehaviour
 {
@@ -39,22 +40,19 @@ public class GamePlayUIManager : MonoBehaviour
     private List<CommandSlot> mainCommandSlots = new List<CommandSlot>();
     private int historicalStepTotal = 0;
 
+    private bool isPaused = false;
+
     void Start()
     {
         SetupUI();
 
-        // --- REFACTORED LOGIC ---
         if (GameDataManager.Instance != null)
         {
-            // Read the name set in the main menu and display it
             playerNameText.text = GameDataManager.Instance.currentSessionData.playerName;
             historicalStepTotal = GameDataManager.Instance.currentSessionData.totalSteps;
             UpdateStepDisplay(0);
         }
         
-        // --- REMOVE THIS ---
-        // We no longer need to listen for the input field's changes here.
-        // playerNameInput.onEndEdit.AddListener(OnPlayerNameChanged);
     }
 
     void OnDestroy()
@@ -64,6 +62,7 @@ public class GamePlayUIManager : MonoBehaviour
             currentPlayer.OnStepTaken.RemoveListener(UpdateStepDisplay);
         }
     }
+
     private void SetupUI()
     {
         // 1. Create the main command slots in the grid
