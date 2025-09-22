@@ -46,7 +46,7 @@ public class BoardManager : MonoBehaviour
     public RectTransform gameViewPanel;
     public float boardPadding = 1.1f;
     [Header("System References")]
-    public GamePlayUIManager gamePlayUIManager;
+    public GameplayUIManager gameplayUIManager;
     [Header("System References")]
 
     // Public property to access the current player instance safely
@@ -69,18 +69,18 @@ public class BoardManager : MonoBehaviour
     public void LoadLevel(int levelIndex)
     {
         Debug.Log($"Loading Level {levelIndex}...");
-        gamePlayUIManager.UpdateCurrentLevelText(levelIndex + 1);
+        gameplayUIManager.UpdateCurrentLevelText(levelIndex + 1);
         if (levelIndex != currentLevelIndex)
         {
-            if (gamePlayUIManager != null)
+            if (gameplayUIManager != null)
             {
-                gamePlayUIManager.ClearAllCommandSlots();
+                gameplayUIManager.ClearAllCommandSlots();
             }
         }
         // --- 1. Cleanup previous level ---
         if (PlayerInstance != null)
         {
-            PlayerInstance.HaltExecution(); // Stop any running coroutines
+            PlayerInstance.HaltExecution();
             Destroy(PlayerInstance.gameObject);
         }
         ClearBoardVisuals();
@@ -253,6 +253,10 @@ public class BoardManager : MonoBehaviour
         PlayerInstance = playerInstance.GetComponent<PlayerController>();
         PlayerInstance.Initialize(this, gridPosition);
         PlayerLandedOnTile(gridPosition);
+        if (gameplayUIManager != null)
+        {
+            gameplayUIManager.ConnectToPlayer(PlayerInstance);
+        }
     }
 
     private void DrawEntireBoard()
@@ -339,9 +343,9 @@ public class BoardManager : MonoBehaviour
     public void RestartLevel()
     {
         Debug.Log("Restarting current level...");
-        // Instead of calling LoadLevel directly, we play a transition.
-        // The "() =>" part is a lambda function, a clean way to pass a method call as a parameter.
-        TransitionManager.Instance.PlayTransition(() => LoadLevel(currentLevelIndex));
+        // --- THIS IS THE FIX ---
+        // Directly call LoadLevel. Do NOT call the TransitionManager here.
+        LoadLevel(currentLevelIndex);
     }
     public void LoadNextLevel()
     {
@@ -356,9 +360,9 @@ public class BoardManager : MonoBehaviour
 
             // --- THIS IS THE FIX ---
             // After updating the data, tell the UI to refresh its display.
-            if (gamePlayUIManager != null)
+            if (gameplayUIManager != null)
             {
-                gamePlayUIManager.UpdateTotalStepCount();
+                gameplayUIManager.UpdateTotalStepCount();
             }
         }
         TransitionManager.Instance.PlayTransition(() => LoadLevel(currentLevelIndex + 1));

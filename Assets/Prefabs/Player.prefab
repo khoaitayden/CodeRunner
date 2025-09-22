@@ -103,11 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentPosition: {x: 0, y: 0}
   currentDirection: 0
-  directionSprites:
-  - {fileID: -8552413759650578641, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
-  - {fileID: -8189467732115575723, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
-  - {fileID: 9152695889459582265, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
-  - {fileID: 9041673867348659178, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
+  previousDirection: 0
   animator: {fileID: 7775572113483106245}
   moveDelay: 0.3
   moveCount: 0

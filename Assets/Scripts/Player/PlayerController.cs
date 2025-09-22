@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
     private Dictionary<Direction, Vector2Int> directionVectors;
     private Dictionary<Direction, Quaternion> directionRotations;
     private bool isExecuting = false;
+    private Coroutine executionCoroutine; 
 
     void Awake()
     {
@@ -61,12 +62,9 @@ public class PlayerController : MonoBehaviour
 
     public void RunCommandSequence(List<Command> commands)
     {
-        if (isExecuting)
-        {
-            Debug.LogWarning("Already executing a sequence!");
-            return;
-        }
-        StartCoroutine(ExecuteSequenceCoroutine(commands));
+        if (isExecuting) return;
+        // --- STORE A REFERENCE TO THE COROUTINE ---
+        executionCoroutine = StartCoroutine(ExecuteSequenceCoroutine(commands));
     }
 
     private IEnumerator ExecuteSequenceCoroutine(List<Command> commands)
@@ -130,24 +128,30 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("--- SEQUENCE COMPLETE (Success) ---");
             OnSequenceComplete?.Invoke();
-            // The BoardManager's PlayerLandedOnTile will handle level progression.
         }
         else
         {
             Debug.Log("--- SEQUENCE FAILED (Not on End tile) ---");
+            
+            // --- SIMPLIFIED LOGIC ---
+            // The fall logic is now the same as the "run out of commands" logic.
+            // We can simulate a "Fall" to reuse the code from MoveForward's Fall case.
+            // Or, more cleanly, just handle it directly here.
+            HaltExecution();
             OnSequenceFail?.Invoke();
             TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
         }
     }
-    
 
-    /// <summary>
-    /// Called by the BoardManager during a level reset to stop any running coroutines.
-    /// </summary>
+
     public void HaltExecution()
     {
         isExecuting = false;
-        StopAllCoroutines();
+        if (executionCoroutine != null)
+        {
+            StopCoroutine(executionCoroutine);
+            executionCoroutine = null;
+        }
     }
 
     // --- Core Action Methods ---
@@ -162,15 +166,27 @@ public class PlayerController : MonoBehaviour
             case MoveResult.Success:
                 currentPosition = targetPosition;
                 UpdateVisuals();
-                Debug.Log("Moved Forward to: " + currentPosition);
+                Debug.Log("Moved Forward to: "
+                    + currentPosition);
                 boardManager.PlayerLandedOnTile(currentPosition);
                 break;
             case MoveResult.Blocked:
                 Debug.Log("Move failed. Blocked by a wall.");
                 break;
             case MoveResult.Fall:
+                // --- THIS IS THE FIX ---
                 Debug.Log("Move failed. Fell off the edge, into air, or onto an inactive bridge.");
-                boardManager.RestartLevel();
+                
+                // 1. Immediately stop all running coroutines on THIS player instance.
+                HaltExecution(); 
+                
+                // 2. Fire the failure event. This will tell the UI to stop the button animation.
+                OnSequenceFail?.Invoke(); 
+                
+                // 3. Trigger the transition and restart.
+                TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
+                
+                // OLD CODE: boardManager.RestartLevel(); // DELETE THIS LINE
                 break;
         }
     }

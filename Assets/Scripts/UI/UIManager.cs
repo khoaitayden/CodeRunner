@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement; 
 
-public class GamePlayUIManager : MonoBehaviour
+public class GameplayUIManager : MonoBehaviour
 {
     [Header("System References")]
     public BoardManager boardManager;
@@ -21,6 +21,7 @@ public class GamePlayUIManager : MonoBehaviour
 
     [Header("Controls")]
     public Button runButton;
+    public Animator runButtonAnimator; 
     public Button resetButton;
 
     [Header("Gameplay UI")]
@@ -39,9 +40,8 @@ public class GamePlayUIManager : MonoBehaviour
     private List<LoopPanelController> loopPanels = new List<LoopPanelController>();
     private List<CommandSlot> mainCommandSlots = new List<CommandSlot>();
     private int historicalStepTotal = 0;
-
     private bool isPaused = false;
-
+    
     void Start()
     {
         SetupUI();
@@ -100,6 +100,27 @@ public class GamePlayUIManager : MonoBehaviour
         // 4. Hook up the button click events
         runButton.onClick.AddListener(OnRunClicked);
         resetButton.onClick.AddListener(OnResetClicked);
+    }
+
+    public void ConnectToPlayer(PlayerController player)
+    {
+        if (player == null)
+        {
+            Debug.LogError("UIManager tried to connect to a null player!");
+            return;
+        }
+
+        // Clear any old listeners to be safe
+        player.OnSequenceStart.RemoveAllListeners();
+        player.OnSequenceComplete.RemoveAllListeners();
+        player.OnSequenceFail.RemoveAllListeners();
+
+        // Add the new listeners
+        player.OnSequenceStart.AddListener(StartRunButtonAnimation);
+        player.OnSequenceComplete.AddListener(StopRunButtonAnimation);
+        player.OnSequenceFail.AddListener(StopRunButtonAnimation);
+
+        Debug.Log("UIManager successfully connected to new player instance.");
     }
 
     private void OnRunClicked()
@@ -198,12 +219,22 @@ public class GamePlayUIManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Public method that can be called by UnityEvents (e.g., from PlayerController) to enable/disable the run button.
-    /// </summary>
-    public void SetRunButtonInteractable(bool isInteractable)
+    public void StartRunButtonAnimation()
     {
-        runButton.interactable = isInteractable;
+        runButton.interactable = false;
+        if (runButtonAnimator != null)
+        {
+            runButtonAnimator.SetBool("isExecuting", true);
+        }
+    }
+
+    public void StopRunButtonAnimation()
+    {
+        runButton.interactable = true;
+        if (runButtonAnimator != null)
+        {
+            runButtonAnimator.SetBool("isExecuting", false);
+        }
     }
 
     public void UpdateCurrentLevelText(int level)
