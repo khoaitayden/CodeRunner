@@ -5,18 +5,8 @@ using TMPro;
 using System.Collections.Generic;
 using System.Linq;
 
-/// <summary>
-/// Manages all UI interactions and navigation within the Main Menu scene.
-/// Handles showing/hiding panels, populating the high score list,
-/// and validating player name input.
-/// </summary>
 public class MainMenuController : MonoBehaviour
 {
-    // --- STATIC FLAG ---
-    /// <summary>
-    /// A static flag that persists between scene loads. If true, the high score
-    /// menu will be shown immediately upon loading the MainMenuScene.
-    /// </summary>
     public static bool ShowHighScoresOnLoad = false;
 
     [Header("Main Menu Elements")]
@@ -24,6 +14,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private TMP_InputField playerNameInput;
     [SerializeField] private Button startGameButton;
     [SerializeField] private Button highScoreButton;
+    [SerializeField] private Button quitButton;
 
     [Header("High Score Elements")]
     [SerializeField] private GameObject highScorePanel;
@@ -54,7 +45,7 @@ public class MainMenuController : MonoBehaviour
             playerNameInput.text = GameDataManager.Instance.currentSessionData.playerName;
         }
 
-        
+
         if (inputFieldImage == null)
         {
             Debug.LogError("Player Name InputField is missing an Image component!");
@@ -64,7 +55,8 @@ public class MainMenuController : MonoBehaviour
         startGameButton.onClick.AddListener(StartGame);
         highScoreButton.onClick.AddListener(ShowHighScores);
         backButton.onClick.AddListener(ShowMainMenu);
-        
+        quitButton.onClick.AddListener(CloseGame);
+
         // Add a listener that calls ValidateName every time the text changes
         playerNameInput.onValueChanged.AddListener(ValidateName);
 
@@ -78,7 +70,7 @@ public class MainMenuController : MonoBehaviour
         {
             ShowMainMenu();
         }
-        
+
         // Run initial validation on the default name or loaded name
         ValidateName(playerNameInput.text);
     }
@@ -138,7 +130,7 @@ public class MainMenuController : MonoBehaviour
     {
         // The validation logic ensures the button is only clickable with a valid name.
         string playerName = playerNameInput.text;
-        
+
         // As a final safety check, we'll still ensure the name isn't empty before proceeding,
         // though this should be guaranteed by the button's interactable state.
         if (string.IsNullOrWhiteSpace(playerName))
@@ -146,7 +138,7 @@ public class MainMenuController : MonoBehaviour
             Debug.LogError("StartGame was called with an empty name. This should not happen.");
             return;
         }
-        
+
         if (GameDataManager.Instance != null)
         {
             GameDataManager.Instance.SetPlayerName(playerName);
@@ -190,7 +182,7 @@ public class MainMenuController : MonoBehaviour
         {
             GameObject entryGO = Instantiate(scoreEntryPrefab, scoreContentParent);
             ScoreEntryUI entryUI = entryGO.GetComponent<ScoreEntryUI>();
-            
+
             if (entryUI != null)
             {
                 entryUI.Initialize(i + 1, sortedScores[i]);
@@ -198,4 +190,12 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    private void CloseGame()
+    {
+# if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }
