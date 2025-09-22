@@ -6,84 +6,24 @@
             "totalSteps": 25
         },
         {
-            "playerName": "Player",
+            "playerName": "Potato",
+            "levelsPassed": 3,
+            "totalSteps": 26
+        },
+        {
+            "playerName": "Thanh",
+            "levelsPassed": 3,
+            "totalSteps": 25
+        },
+        {
+            "playerName": "BEOBEO",
             "levelsPassed": 1,
             "totalSteps": 9
         },
         {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
+            "playerName": "ggg",
             "levelsPassed": 0,
             "totalSteps": 0
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 0,
-            "totalSteps": 0
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 0,
-            "totalSteps": 0
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 1,
-            "totalSteps": 9
-        },
-        {
-            "playerName": "Player",
-            "levelsPassed": 2,
-            "totalSteps": 20
         }
     ]
 }

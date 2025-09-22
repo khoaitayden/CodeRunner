@@ -55,7 +55,14 @@ public class PauseMenuUI : MonoBehaviour
     public void OpenSettings() { Debug.Log("Settings Button Clicked!"); }
     public void EndGameSession()
     {
+        // IMPORTANT: Always unpause before leaving the scene.
         Time.timeScale = 1f;
+        
+        // --- THIS IS THE NEW LOGIC ---
+        // 1. Set the static flag to true so the main menu knows to show the high scores.
+        MainMenuController.ShowHighScoresOnLoad = true;
+        
+        // 2. Transition to the main menu scene.
         if (TransitionManager.Instance != null)
         {
             TransitionManager.Instance.TransitionToScene(mainMenuSceneName);

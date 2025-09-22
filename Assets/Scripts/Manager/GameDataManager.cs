@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
-
+using System.Linq;
 public class GameDataManager : MonoBehaviour
 {
     // --- Singleton Pattern ---
@@ -27,27 +27,25 @@ public class GameDataManager : MonoBehaviour
 
         // --- Use your path logic to set a SINGLE file path ---
         InitializeSavePath();
-        
+
         // Load all previous sessions from the file
         LoadAllSessions();
-        
-        // Start a brand new session and add it to our list
-        StartNewSession();
+
     }
 
     // --- THIS IS YOUR PROVIDED METHOD, MODIFIED TO POINT TO ONE FILE ---
     private void InitializeSavePath()
     {
         string fileName = "AllPlayerScores.json";
-        #if UNITY_EDITOR
-            string assetsPath = Application.dataPath;
-            string saveFolder = Path.Combine(assetsPath, "Data", "PlayerSaves"); 
-            Directory.CreateDirectory(saveFolder);
-            saveFilePath = Path.Combine(saveFolder, fileName);
-        #else
+#if UNITY_EDITOR
+        string assetsPath = Application.dataPath;
+        string saveFolder = Path.Combine(assetsPath, "Data", "PlayerSaves");
+        Directory.CreateDirectory(saveFolder);
+        saveFilePath = Path.Combine(saveFolder, fileName);
+#else
             saveFilePath = Path.Combine(Application.persistentDataPath, fileName);
-        #endif
-        
+#endif
+
         Debug.Log($"Save data will be stored at: {saveFilePath}");
     }
 
@@ -67,7 +65,7 @@ public class GameDataManager : MonoBehaviour
         }
     }
 
-    private void StartNewSession()
+    public void BeginNewSession()
     {
         // Create a new SaveData object for this playthrough
         currentSessionData = new SaveData
@@ -79,9 +77,8 @@ public class GameDataManager : MonoBehaviour
         
         // Add this new session to our master list
         allSaves.allSessions.Add(currentSessionData);
-        Debug.Log("--- New Game Session Started ---");
+        Debug.Log("--- New Game Session Started and added to the list ---");
     }
-
     // This single method saves the ENTIRE list back to the file
     public void SaveGame()
     {
@@ -115,5 +112,14 @@ public class GameDataManager : MonoBehaviour
     public List<SaveData> GetAllSaveData()
     {
         return allSaves.allSessions;
+    }
+    
+    public bool PlayerNameExists(string nameToCheck)
+    {
+        if (allSaves == null || allSaves.allSessions == null) return false;
+
+        // .Any() is a powerful LINQ method that checks if any element in a list meets a condition.
+        // StringComparison.OrdinalIgnoreCase makes the check case-insensitive ("Player" == "player").
+        return allSaves.allSessions.Any(session => session.playerName.Equals(nameToCheck, System.StringComparison.OrdinalIgnoreCase));
     }
 }

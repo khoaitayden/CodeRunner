@@ -87,11 +87,6 @@ public class BoardManager : MonoBehaviour
 
         // --- 2. Set up for the new level ---
         currentLevelIndex = levelIndex;
-        if (currentLevelIndex >= levelFiles.Count)
-        {
-            Debug.Log("CONGRATULATIONS! You've completed all levels!");
-            return;
-        }
 
         TextAsset levelAsset = levelFiles[currentLevelIndex];
         if (levelAsset == null)
@@ -358,12 +353,24 @@ public class BoardManager : MonoBehaviour
             
             GameDataManager.Instance.UpdateProgress(levelNumberPassed, stepsTaken);
 
-            // --- THIS IS THE FIX ---
-            // After updating the data, tell the UI to refresh its display.
-            if (gameplayUIManager != null)
-            {
-                gameplayUIManager.UpdateTotalStepCount();
-            }
+        int nextLevelIndex = currentLevelIndex + 1;
+
+        if (nextLevelIndex >= levelFiles.Count)
+        {
+            // Player has finished the last level.
+            Debug.Log("CONGRATULATIONS! You've completed all levels!");
+            
+            // 1. Set the flag to show the high scores.
+            MainMenuController.ShowHighScoresOnLoad = true;
+            
+            // 2. Transition directly to the main menu.
+            TransitionManager.Instance.TransitionToScene("MainMenuScene");
+        }
+        else
+        {
+            // There are more levels to play. Transition to the next one.
+            TransitionManager.Instance.PlayTransition(() => LoadLevel(nextLevelIndex));
+        }
         }
         TransitionManager.Instance.PlayTransition(() => LoadLevel(currentLevelIndex + 1));
     }
