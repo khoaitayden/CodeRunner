@@ -25,37 +25,28 @@ public class PlayerController : MonoBehaviour
 
     private BoardManager boardManager;
     private Dictionary<Direction, Vector2Int> directionVectors;
-    private Dictionary<Direction, Quaternion> directionRotations;
     private bool isExecuting = false;
-    private Coroutine executionCoroutine; 
+    private Coroutine executionCoroutine;
 
     void Awake()
     {
         directionVectors = new Dictionary<Direction, Vector2Int>
         {
-            { Direction.Up, Vector2Int.up },
-            { Direction.Right,  Vector2Int.right },
-            { Direction.Down, Vector2Int.down },
+            { Direction.Up,    Vector2Int.up },
+            { Direction.Right, Vector2Int.right },
+            { Direction.Down,  Vector2Int.down },
             { Direction.Left,  Vector2Int.left }
-        };
-
-        directionRotations = new Dictionary<Direction, Quaternion>
-        {
-            { Direction.Up, Quaternion.Euler(0, 0, 0) },
-            { Direction.Right,  Quaternion.Euler(0, 0, -90) },
-            { Direction.Down, Quaternion.Euler(0, 0, 180) },
-            { Direction.Left,  Quaternion.Euler(0, 0, 270) } // Or 90, depending on your sprite's default orientation
         };
     }
 
-    public void Initialize(BoardManager manager, Vector2Int startPosition)
+    public void Initialize(BoardManager manager, Vector2Int startPosition, Direction startingDirection)
     {
         boardManager = manager;
         currentPosition = startPosition;
-        currentDirection = Direction.Up;
+        currentDirection = startingDirection;
+        
         previousDirection = currentDirection;
         transform.position = boardManager.GridToWorldPosition(currentPosition);
-        transform.rotation = directionRotations[currentDirection];
         UpdateVisuals();
         moveCount = 0;
     }

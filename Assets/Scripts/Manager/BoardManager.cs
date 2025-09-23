@@ -148,7 +148,7 @@ public class BoardManager : MonoBehaviour
 
         if (startFound)
         {
-            SpawnPlayer(startPosition);
+            SpawnPlayer(startPosition, loadedLevel.startDirection); 
         }
         else
         {
@@ -240,13 +240,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    private void SpawnPlayer(Vector2Int gridPosition)
+    private void SpawnPlayer(Vector2Int gridPosition, Direction startDirection)
     {
         if (playerPrefab == null) { Debug.LogError("Player Prefab is not assigned!"); return; }
         Vector3 worldPos = GridToWorldPosition(gridPosition);
         GameObject playerInstance = Instantiate(playerPrefab, worldPos, Quaternion.identity);
         PlayerInstance = playerInstance.GetComponent<PlayerController>();
-        PlayerInstance.Initialize(this, gridPosition);
+        PlayerInstance.Initialize(this, gridPosition, startDirection);
         PlayerLandedOnTile(gridPosition);
         if (gameplayUIManager != null)
         {
@@ -387,6 +387,19 @@ public class BoardManager : MonoBehaviour
         }
 
         var levelData = new LevelData();
+        if (!string.IsNullOrEmpty(compactData.startDirection))
+        {
+            // Try to parse the string into our Direction enum. The 'true' makes it case-insensitive.
+            if (System.Enum.TryParse(compactData.startDirection, true, out Direction parsedDirection))
+            {
+                levelData.startDirection = parsedDirection;
+            }
+            else
+            {
+                Debug.LogWarning($"Unknown startDirection '{compactData.startDirection}' in JSON. Defaulting to Up.");
+                levelData.startDirection = Direction.Up; // Default fallback
+            }
+        }
         if (compactData.layout == null || compactData.layout.Count == 0)
         {
             levelData.height = 0; levelData.width = 0; return levelData;

@@ -2,6 +2,7 @@
   "layout": [
     "S.W3.E"
   ],
+  "startDirection": "Up",
   "definitions": [
     {
       "key": "W3",

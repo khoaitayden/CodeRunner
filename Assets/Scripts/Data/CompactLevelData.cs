@@ -19,4 +19,5 @@ public class CompactLevelData
 {
     public List<string> layout;
     public List<TileDefinition> definitions;
+    public string startDirection; // <-- ADD THIS LINE
 }

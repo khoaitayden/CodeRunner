@@ -4,6 +4,7 @@
     "a    .",
     "S    E"
   ],
+  "startDirection": "Up",
   "definitions": [
     {
       "key": "a",
