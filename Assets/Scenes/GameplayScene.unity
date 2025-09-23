@@ -3314,10 +3314,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelFiles:
-  - {fileID: 4900000, guid: 6ae0afa4f69ef9d429d2745560a7d188, type: 3}
   - {fileID: 4900000, guid: cf9bfe1c697b6f0488f5a55e84800ca4, type: 3}
   - {fileID: 4900000, guid: 918b1935d808f7c47b92d865f79ff0fa, type: 3}
   - {fileID: 4900000, guid: b89f83925a5222649a996c7a9285d4b7, type: 3}
+  - {fileID: 4900000, guid: 6ae0afa4f69ef9d429d2745560a7d188, type: 3}
   playerPrefab: {fileID: 6724069641675009704, guid: 75c846321eb58ab4ea8832e6de9ce7eb, type: 3}
   baseLayer: {fileID: 1236824271}
   interactableLayer: {fileID: 511549361}

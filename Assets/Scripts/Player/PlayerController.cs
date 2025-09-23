@@ -11,18 +11,18 @@ public class PlayerController : MonoBehaviour
     public Vector2Int currentPosition;
     public Direction currentDirection;
     public Direction previousDirection;
-    public Animator animator;
-
-    [Header("Execution Settings")]
-    [Tooltip("The delay in seconds between each command execution.")]
+    public Sprite upSprite;
+    public Sprite rightSprite;
+    public Sprite downSprite;
+    public Sprite leftSprite;
     public float moveDelay;
     [HideInInspector] public int moveCount = 0;
     [Header("Events")]
     public UnityEvent OnSequenceStart;
-    public UnityEvent OnSequenceComplete; // Fired on success
-    public UnityEvent OnSequenceFail;     // Fired on failure (e.g., finishing in the wrong spot)
+    public UnityEvent OnSequenceComplete; 
+    public UnityEvent OnSequenceFail;     
     public UnityEvent<int> OnStepTaken;
-
+    private SpriteRenderer spriteRenderer;
     private BoardManager boardManager;
     private Dictionary<Direction, Vector2Int> directionVectors;
     private bool isExecuting = false;
@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
         directionVectors = new Dictionary<Direction, Vector2Int>
         {
             { Direction.Up,    Vector2Int.up },
@@ -44,17 +45,18 @@ public class PlayerController : MonoBehaviour
         boardManager = manager;
         currentPosition = startPosition;
         currentDirection = startingDirection;
-        
+
         previousDirection = currentDirection;
         transform.position = boardManager.GridToWorldPosition(currentPosition);
+
         UpdateVisuals();
+
         moveCount = 0;
     }
 
     public void RunCommandSequence(List<Command> commands)
     {
         if (isExecuting) return;
-        // --- STORE A REFERENCE TO THE COROUTINE ---
         executionCoroutine = StartCoroutine(ExecuteSequenceCoroutine(commands));
     }
 
@@ -64,22 +66,16 @@ public class PlayerController : MonoBehaviour
         OnSequenceStart?.Invoke();
         Debug.Log("--- SEQUENCE START ---");
 
-        // Delegate the actual execution to our recursive helper coroutine
         yield return StartCoroutine(ExecuteCommands(commands));
 
-        // This code runs only after the entire sequence is complete
         isExecuting = false;
         CheckFinalPosition();
     }
 
-    /// <summary>
-    /// A recursive coroutine that executes a list of commands, including loops.
-    /// </summary>
     private IEnumerator ExecuteCommands(List<Command> commandsToExecute)
     {
         foreach (Command command in commandsToExecute)
         {
-            // If a previous command caused a level reset, stop everything.
             if (!isExecuting) yield break;
 
             if (command.Type == CommandType.Loop)
@@ -123,11 +119,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             Debug.Log("--- SEQUENCE FAILED (Not on End tile) ---");
-            
-            // --- SIMPLIFIED LOGIC ---
-            // The fall logic is now the same as the "run out of commands" logic.
-            // We can simulate a "Fall" to reuse the code from MoveForward's Fall case.
-            // Or, more cleanly, just handle it directly here.
+
             HaltExecution();
             OnSequenceFail?.Invoke();
             TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
@@ -145,7 +137,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // --- Core Action Methods ---
 
     public void MoveForward()
     {
@@ -162,37 +153,33 @@ public class PlayerController : MonoBehaviour
                 boardManager.PlayerLandedOnTile(currentPosition);
                 break;
             case MoveResult.Blocked:
-                Debug.Log("Move failed. Blocked by a wall.");
+                StartCoroutine(HitWallAnimation());
+                Debug.Log("Move failed. Blocked by a wall");
                 break;
             case MoveResult.Fall:
-                // --- THIS IS THE FIX ---
-                Debug.Log("Move failed. Fell off the edge, into air, or onto an inactive bridge.");
-                
-                // 1. Immediately stop all running coroutines on THIS player instance.
-                HaltExecution(); 
-                
-                // 2. Fire the failure event. This will tell the UI to stop the button animation.
-                OnSequenceFail?.Invoke(); 
-                
-                // 3. Trigger the transition and restart.
+                StartCoroutine(FallAnimation());
+                Debug.Log("Move failed. Fell off the edge, into air, or onto an inactive bridge");
+
+                HaltExecution();
+
+                OnSequenceFail?.Invoke();
+
                 TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
-                
-                // OLD CODE: boardManager.RestartLevel(); // DELETE THIS LINE
+
                 break;
         }
     }
 
     public void TurnLeft()
     {
-        // Up(0)->Left(3), Right(1)->Up(0), Down(2)->Right(1), Left(3)->Down(2)
-        currentDirection = (Direction)(((int)currentDirection + 3) % 4); 
+        currentDirection = (Direction)(((int)currentDirection + 3) % 4);
         UpdateVisuals();
     }
 
     public void TurnRight()
     {
         // Up(0)->Right(1), Right(1)->Down(2), etc.
-        currentDirection = (Direction)(((int)currentDirection + 1) % 4); 
+        currentDirection = (Direction)(((int)currentDirection + 1) % 4);
         UpdateVisuals();
     }
 
@@ -200,9 +187,84 @@ public class PlayerController : MonoBehaviour
     {
         transform.position = new Vector3(boardManager.GridToWorldPosition(currentPosition).x, boardManager.GridToWorldPosition(currentPosition).y + 0.3f, transform.position.z);
 
-        animator.SetInteger("FacingDirection", (int)currentDirection);
+        switch (currentDirection)
+        {
+            case Direction.Up:
+                spriteRenderer.sprite = upSprite;
+                break;
+            case Direction.Right:
+                spriteRenderer.sprite = rightSprite;
+                break;
+            case Direction.Down:
+                spriteRenderer.sprite = downSprite;
+                break;
+            case Direction.Left:
+                spriteRenderer.sprite = leftSprite;
+                break;
+        }
+    }
+    private IEnumerator HitWallAnimation()
+    {
+        float duration = moveDelay;
+        float elapsed = 0f;
+
+        Vector3 originalPosition = transform.localPosition;
+        Vector3 originalScale = transform.localScale;
+        Vector3 forwardOffset = transform.forward * 0.1f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            float phase = elapsed / duration;
+            float triangle = 1f - Mathf.Abs(2f * (phase - 0.5f));
+            float jiggleAmount = 0.08f * Mathf.Sin(phase * Mathf.PI * 4f);
+
+            Vector3 offset = forwardOffset * triangle + transform.right * jiggleAmount;
+            transform.localPosition = originalPosition + offset;
+
+            float pulse = 1f + 0.1f * triangle;
+            transform.localScale = originalScale * pulse;
+
+            yield return null;
+        }
+
+        transform.localPosition = originalPosition;
+        transform.localScale = originalScale;
     }
 
+    private IEnumerator FallAnimation()
+    {
+        float duration = moveDelay;
+        float elapsed = 0f;
 
+        Vector3 originalPosition = transform.position;
+        Vector3 originalScale = transform.localScale;
 
+        // Step 1: Step "up" into the void — just once, at start
+        Vector3 steppedUpPosition = originalPosition + Vector3.up * 0.2f;
+        transform.position = steppedUpPosition;
+
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        Color originalColor = spriteRenderer.color;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration; 
+
+            float squashY = Mathf.Lerp(1f, 0.3f, t);
+
+            float shrinkX = Mathf.Lerp(1f, 0.5f, t);
+
+            transform.localScale = new Vector3(shrinkX, squashY, 1f);
+
+            Color fadedColor = originalColor;
+            fadedColor.a = Mathf.Lerp(1f, 0f, t);
+            spriteRenderer.color = fadedColor;
+
+            yield return null;
+        }
+        spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
+    }
 }

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6255425884804516418}
   - component: {fileID: 5623681077004108003}
   - component: {fileID: 8605136341347720668}
-  - component: {fileID: 7775572113483106245}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -28,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 6724069641675009704}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.5206635, y: -3.4934926, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -104,7 +103,10 @@ MonoBehaviour:
   currentPosition: {x: 0, y: 0}
   currentDirection: 0
   previousDirection: 0
-  animator: {fileID: 7775572113483106245}
+  upSprite: {fileID: 9152695889459582265, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
+  rightSprite: {fileID: 9041673867348659178, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
+  downSprite: {fileID: 3262109642170187937, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
+  leftSprite: {fileID: -8189467732115575723, guid: cf6e2e5ef04bddc45b63d53365af1ffb, type: 3}
   moveDelay: 0.3
   moveCount: 0
   OnSequenceStart:
@@ -119,25 +121,3 @@ MonoBehaviour:
   OnStepTaken:
     m_PersistentCalls:
       m_Calls: []
---- !u!95 &7775572113483106245
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6724069641675009704}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 8d565d79bdb0e5d4487bfd51b333cfbe, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
