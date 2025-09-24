@@ -22,7 +22,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip hitWallSound;
     [SerializeField] private AudioClip moveSound;
     [SerializeField] private AudioClip turnSound;
-    [HideInInspector] public int moveCount = 0;
+    [SerializeField] private AudioClip lostSound;
+    [SerializeField] private AudioClip winSound;
 
     [Header("Events")]
     public UnityEvent OnSequenceStart;
@@ -35,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private bool isExecuting = false;
     private Coroutine executionCoroutine;
 
+    [HideInInspector] public int moveCount = 0;
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -121,7 +123,9 @@ public class PlayerController : MonoBehaviour
         if (finalTile != null && finalTile.tileTypeEnum == TileType.End)
         {
             Debug.Log("--- SEQUENCE COMPLETE (Success) ---");
+            HaltExecution();
             OnSequenceComplete?.Invoke();
+            SFXManager.Instance.PlayRandomPitchSoundEffect(winSound, 0.9f, 1.1f);
         }
         else
         {
@@ -129,6 +133,7 @@ public class PlayerController : MonoBehaviour
 
             HaltExecution();
             OnSequenceFail?.Invoke();
+            SFXManager.Instance.PlayRandomPitchSoundEffect(lostSound, 0.9f, 1.1f);
             TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
         }
     }

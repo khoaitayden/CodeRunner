@@ -113,7 +113,8 @@ MonoBehaviour:
   hitWallSound: {fileID: 8300000, guid: 6bfe342111ccd8f49a877480113d6dec, type: 3}
   moveSound: {fileID: 8300000, guid: de5d91cb7004a594a9d236ebf1c48e3e, type: 3}
   turnSound: {fileID: 8300000, guid: 706c1fcd967c37649a738785b899b326, type: 3}
-  moveCount: 0
+  lostSound: {fileID: 8300000, guid: c32828da0e494224987972f566b12eef, type: 3}
+  winSound: {fileID: 8300000, guid: 5f3acabf881e3b44a96c35ea16bd28af, type: 3}
   OnSequenceStart:
     m_PersistentCalls:
       m_Calls: []
@@ -126,6 +127,7 @@ MonoBehaviour:
   OnStepTaken:
     m_PersistentCalls:
       m_Calls: []
+  moveCount: 0
 --- !u!82 &459193912456902209
 AudioSource:
   m_ObjectHideFlags: 0

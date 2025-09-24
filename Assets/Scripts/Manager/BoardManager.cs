@@ -24,6 +24,7 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private List<TextAsset> levelFiles;
     private int currentLevelIndex = 0;
 
+
     [Header("Object Prefabs")]
     [SerializeField] private GameObject playerPrefab;
 
@@ -338,39 +339,36 @@ public class BoardManager : MonoBehaviour
     public void RestartLevel()
     {
         Debug.Log("Restarting current level...");
-        // --- THIS IS THE FIX ---
-        // Directly call LoadLevel. Do NOT call the TransitionManager here.
         LoadLevel(currentLevelIndex);
     }
     public void LoadNextLevel()
     {
         Debug.Log("Loading next level...");
-        
         if (GameDataManager.Instance != null && PlayerInstance != null)
         {
-            int levelNumberPassed = currentLevelIndex + 1; 
+            int levelNumberPassed = currentLevelIndex + 1;
             int stepsTaken = PlayerInstance.moveCount;
-            
+
             GameDataManager.Instance.UpdateProgress(levelNumberPassed, stepsTaken);
 
-        int nextLevelIndex = currentLevelIndex + 1;
+            int nextLevelIndex = currentLevelIndex + 1;
 
-        if (nextLevelIndex >= levelFiles.Count)
-        {
-            // Player has finished the last level.
-            Debug.Log("CONGRATULATIONS! You've completed all levels!");
-            
-            // 1. Set the flag to show the high scores.
-            MainMenuController.ShowHighScoresOnLoad = true;
-            
-            // 2. Transition directly to the main menu.
-            TransitionManager.Instance.TransitionToScene("MainMenuScene");
-        }
-        else
-        {
-            // There are more levels to play. Transition to the next one.
-            TransitionManager.Instance.PlayTransition(() => LoadLevel(nextLevelIndex));
-        }
+            if (nextLevelIndex >= levelFiles.Count)
+            {
+                // Player has finished the last level.
+                Debug.Log("CONGRATULATIONS! You've completed all levels!");
+
+                // 1. Set the flag to show the high scores.
+                MainMenuController.ShowHighScoresOnLoad = true;
+
+                // 2. Transition directly to the main menu.
+                TransitionManager.Instance.TransitionToScene("MainMenuScene");
+            }
+            else
+            {
+                // There are more levels to play. Transition to the next one.
+                TransitionManager.Instance.PlayTransition(() => LoadLevel(nextLevelIndex));
+            }
         }
         TransitionManager.Instance.PlayTransition(() => LoadLevel(currentLevelIndex + 1));
     }
