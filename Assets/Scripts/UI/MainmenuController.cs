@@ -11,8 +11,11 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Main Menu Elements")]
     [SerializeField] private GameObject mainMenuPanel;
+    [SerializeField] private GameObject settingsPanel;
+
     [SerializeField] private TMP_InputField playerNameInput;
     [SerializeField] private Button startGameButton;
+    [SerializeField] private Button settingsButton;
     [SerializeField] private Button highScoreButton;
     [SerializeField] private Button quitButton;
 
@@ -54,6 +57,7 @@ public class MainMenuController : MonoBehaviour
         // --- Hook up all button and input field listeners ---
         startGameButton.onClick.AddListener(StartGame);
         highScoreButton.onClick.AddListener(ShowHighScores);
+        settingsButton.onClick.AddListener(OpenSettings);
         backButton.onClick.AddListener(ShowMainMenu);
         quitButton.onClick.AddListener(CloseGame);
 
@@ -70,15 +74,15 @@ public class MainMenuController : MonoBehaviour
         {
             ShowMainMenu();
         }
-
-        // Run initial validation on the default name or loaded name
+        MusicManager.Instance?.StartPlaylist(true);
         ValidateName(playerNameInput.text);
     }
 
 
-    /// <summary>
-    /// Activates the main menu panel and deactivates the high score panel.
-    /// </summary>
+    public void OpenSettings()
+    {
+        settingsPanel.SetActive(true);
+    }
     private void ShowMainMenu()
     {
         mainMenuPanel.SetActive(true);
@@ -130,7 +134,7 @@ public class MainMenuController : MonoBehaviour
     {
         // The validation logic ensures the button is only clickable with a valid name.
         string playerName = playerNameInput.text;
-
+        MusicManager.Instance?.StartPlaylist(false);
         // As a final safety check, we'll still ensure the name isn't empty before proceeding,
         // though this should be guaranteed by the button's interactable state.
         if (string.IsNullOrWhiteSpace(playerName))

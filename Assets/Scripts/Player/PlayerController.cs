@@ -8,19 +8,26 @@ public enum Direction { Up, Right, Down, Left }
 public class PlayerController : MonoBehaviour
 {
     [Header("Player State")]
-    public Vector2Int currentPosition;
-    public Direction currentDirection;
-    public Direction previousDirection;
-    public Sprite upSprite;
-    public Sprite rightSprite;
-    public Sprite downSprite;
-    public Sprite leftSprite;
-    public float moveDelay;
+    [SerializeField] private Vector2Int currentPosition;
+    [SerializeField] private Direction currentDirection;
+    [SerializeField] private Direction previousDirection;
+    [SerializeField] private Sprite upSprite;
+    [SerializeField] private Sprite rightSprite;
+    [SerializeField] private Sprite downSprite;
+    [SerializeField] private Sprite leftSprite;
+    [SerializeField] private float moveDelay;
+
+    [Header("Sound Effects")]
+    [SerializeField] private AudioClip fallSound;
+    [SerializeField] private AudioClip hitWallSound;
+    [SerializeField] private AudioClip moveSound;
+    [SerializeField] private AudioClip turnSound;
     [HideInInspector] public int moveCount = 0;
+
     [Header("Events")]
     public UnityEvent OnSequenceStart;
-    public UnityEvent OnSequenceComplete; 
-    public UnityEvent OnSequenceFail;     
+    public UnityEvent OnSequenceComplete;
+    public UnityEvent OnSequenceFail;
     public UnityEvent<int> OnStepTaken;
     private SpriteRenderer spriteRenderer;
     private BoardManager boardManager;
@@ -146,39 +153,40 @@ public class PlayerController : MonoBehaviour
         switch (result)
         {
             case MoveResult.Success:
+                
                 currentPosition = targetPosition;
                 UpdateVisuals();
                 Debug.Log("Moved Forward to: "
                     + currentPosition);
                 boardManager.PlayerLandedOnTile(currentPosition);
+                SFXManager.Instance.PlayRandomPitchSoundEffect(moveSound, 0.8f, 1.5f);
                 break;
             case MoveResult.Blocked:
+                SFXManager.Instance.PlayRandomPitchSoundEffect(hitWallSound, 0.5f, 1.5f);
                 StartCoroutine(HitWallAnimation());
                 Debug.Log("Move failed. Blocked by a wall");
                 break;
             case MoveResult.Fall:
                 StartCoroutine(FallAnimation());
                 Debug.Log("Move failed. Fell off the edge, into air, or onto an inactive bridge");
-
                 HaltExecution();
-
                 OnSequenceFail?.Invoke();
-
                 TransitionManager.Instance.PlayTransition(() => boardManager.RestartLevel());
-
+                SFXManager.Instance.PlayRandomPitchSoundEffect(fallSound, 0.8f, 1.2f);
                 break;
         }
     }
 
     public void TurnLeft()
     {
+        SFXManager.Instance.PlayRandomPitchSoundEffect(turnSound, 0.8f, 1.5f);
         currentDirection = (Direction)(((int)currentDirection + 3) % 4);
         UpdateVisuals();
     }
 
     public void TurnRight()
     {
-        // Up(0)->Right(1), Right(1)->Down(2), etc.
+        SFXManager.Instance.PlayRandomPitchSoundEffect(turnSound, 0.8f, 1.5f);
         currentDirection = (Direction)(((int)currentDirection + 1) % 4);
         UpdateVisuals();
     }
@@ -251,7 +259,7 @@ public class PlayerController : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration; 
+            float t = elapsed / duration;
 
             float squashY = Mathf.Lerp(1f, 0.3f, t);
 
@@ -267,4 +275,5 @@ public class PlayerController : MonoBehaviour
         }
         spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
     }
+    
 }

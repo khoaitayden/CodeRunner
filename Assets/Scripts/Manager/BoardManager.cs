@@ -21,32 +21,32 @@ public enum MoveResult
 public class BoardManager : MonoBehaviour
 {
     [Header("Level Data")]
-    public List<TextAsset> levelFiles;
+    [SerializeField] private List<TextAsset> levelFiles;
     private int currentLevelIndex = 0;
 
     [Header("Object Prefabs")]
-    public GameObject playerPrefab;
+    [SerializeField] private GameObject playerPrefab;
 
     [Header("Tilemap References")]
-    public Tilemap baseLayer;
-    public Tilemap interactableLayer;
+    [SerializeField] private Tilemap baseLayer;
+    [SerializeField] private Tilemap interactableLayer;
 
     [Header("Tile Assets (Simple)")]
-    public List<TileMapping> tileMappings;
+    [SerializeField] private List<TileMapping> tileMappings;
 
     [Header("Tile Assets (Stateful)")]
-    public TileBase switchOnTile;
-    public TileBase switchOffTile;
-    public TileBase bridgeActiveTile;
-    public TileBase bridgeInactiveTile;
-    public List<TileBase> weakFloorTiles;
+    [SerializeField] private TileBase switchOnTile;
+    [SerializeField] private TileBase switchOffTile;
+    [SerializeField] private TileBase bridgeActiveTile;
+    [SerializeField] private TileBase bridgeInactiveTile;
+    [SerializeField] private List<TileBase> weakFloorTiles;
 
     [Header("Camera Control")]
-    public Camera mainCamera;
-    public RectTransform gameViewPanel;
-    public float boardPadding = 1.1f;
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private RectTransform gameViewPanel;
+    [SerializeField] private float boardPadding = 1.1f;
     [Header("System References")]
-    public GameplayUIManager gameplayUIManager;
+    [SerializeField] private GameplayUIManager gameplayUIManager;
     [Header("System References")]
 
     // Public property to access the current player instance safely

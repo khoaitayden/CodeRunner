@@ -6,11 +6,12 @@ public class PauseMenuUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject visualPanel; // Reference to the child panel
+    [SerializeField] private GameObject settingsPanel; // Reference to the settings panel
 
     [Header("Buttons")]
     [SerializeField] private Button continueButton;
     [SerializeField] private Button settingsButton; // Good to add for completeness
-    [SerializeField] private Button endButton;
+    [SerializeField] private Button endButton; // If you want a back button in settings
 
     [Header("Scene Settings")]
     [SerializeField] private string mainMenuSceneName = "MainMenuScene";
@@ -52,16 +53,20 @@ public class PauseMenuUI : MonoBehaviour
     // --- Button Methods (no changes needed here) ---
 
     public void ContinueGame() { TogglePause(); }
-    public void OpenSettings() { Debug.Log("Settings Button Clicked!"); }
+    public void OpenSettings()
+    {
+        settingsPanel.SetActive(true);
+    }
+    
     public void EndGameSession()
     {
         // IMPORTANT: Always unpause before leaving the scene.
         Time.timeScale = 1f;
-        
+
         // --- THIS IS THE NEW LOGIC ---
         // 1. Set the static flag to true so the main menu knows to show the high scores.
         MainMenuController.ShowHighScoresOnLoad = true;
-        
+
         // 2. Transition to the main menu scene.
         if (TransitionManager.Instance != null)
         {
