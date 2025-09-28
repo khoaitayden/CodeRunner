@@ -1,0 +1,48 @@
+{
+  "layout": [
+    "S.c...a",
+    "  dcW1. ",
+    "  .  .  ",
+    "E.bt.b. ",
+    " .b..#. "
+  ],
+  "startDirection": "Right",
+  "definitions": [
+    {
+      "key": "a",
+      "type": "Switch",
+      "switchId": 1
+    },
+    {
+      "key": "b",
+      "type": "Bridge",
+      "controlledBySwitchId": 1,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "c",
+      "type": "Bridge",
+      "controlledBySwitchId": 1,
+      "isBridgeInitiallyActive": true,
+      "activateOnSwitchOn": false
+    },
+    {
+      "key": "t",
+      "type": "Bridge",
+      "controlledBySwitchId": 2,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "d",
+      "type": "Switch",
+      "switchId": 2
+    },
+    {
+      "key": "W1",
+      "type": "WeakFloor",
+      "initialSteps": 1
+    }
+  ]
+}

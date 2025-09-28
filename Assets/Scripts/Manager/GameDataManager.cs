@@ -68,7 +68,6 @@ public class GameDataManager : MonoBehaviour
         
         allSaves.allSessions.Add(currentSessionData);
     }
-    // This single method saves the ENTIRE list back to the file
     public void SaveGame()
     {
         string json = JsonUtility.ToJson(allSaves, true);

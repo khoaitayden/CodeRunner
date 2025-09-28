@@ -1,10 +1,10 @@
 {
   "layout": [
-    "S...... ",
-    "a     . ",
-    "W1     .",
-    ".     . ",
-    "E..b... "
+    "S.a....",
+    ". .    ",
+    ". .W1b.E",
+    ". . .  ",
+    ".....  "
   ],
   "startDirection": "Right",
   "definitions": [

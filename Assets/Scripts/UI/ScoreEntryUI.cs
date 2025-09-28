@@ -8,7 +8,6 @@ public class ScoreEntryUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelsText;
     [SerializeField] private TextMeshProUGUI stepsText;
 
-    // This public method will be called to populate the UI fields
     public void Initialize(int rank, SaveData data)
     {
         rankText.text = rank.ToString();

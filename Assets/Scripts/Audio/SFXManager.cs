@@ -13,7 +13,6 @@ public class SFXManager : MonoBehaviour
             return;
         }
         Instance = this;
-        // DontDestroyOnLoad(gameObject);
     }
 
     public void PlayRandomPitchSoundEffect(AudioClip clip, float minPitch = 0.8f, float maxPitch = 1.2f)

@@ -1,13 +1,35 @@
 {
   "layout": [
-    "S.W3.E"
+    "             ",
+    " S..a...dE   ",
+    "    .   .    ",
+    "    c   .    ",
+    "    .bbb.    ",
+    "             "
   ],
-  "startDirection": "Up",
-  "definitions": [
-    {
-      "key": "W3",
-      "type": "WeakFloor",
-      "initialSteps": 3
+    "startDirection": "Right",
+    "definitions": [
+    { 
+      "key": "a", 
+      "type": "Switch", 
+      "switchId": 1 
+    },
+    { 
+      "key": "b", 
+      "type": "Bridge", 
+      "controlledBySwitchId": 1, 
+      "isBridgeInitiallyActive": false, 
+      "activateOnSwitchOn": true },
+    { 
+      "key": "c", 
+      "type": "Switch", 
+      "switchId": 2 },
+    { 
+      "key": "d", 
+      "type": "Bridge", 
+      "controlledBySwitchId": 2, 
+      "isBridgeInitiallyActive": false, 
+      "activateOnSwitchOn": true 
     }
   ]
-}
+} 

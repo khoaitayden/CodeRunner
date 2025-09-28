@@ -3,7 +3,6 @@ using UnityEngine.Tilemaps;
 using System.Collections;
 using System.Collections.Generic;
 
-// Helper class to link a TileType enum to a TileBase asset in the Inspector for simple tiles.
 [System.Serializable]
 public class TileMapping
 {
@@ -13,9 +12,9 @@ public class TileMapping
 
 public enum MoveResult
 {
-    Success, // The tile is safe to walk on
-    Blocked, // A wall, player cannot move
-    Fall     // An edge, air, or inactive bridge; triggers a reset
+    Success,
+    Blocked, 
+    Fall    
 }
 
 public class BoardManager : MonoBehaviour
@@ -50,7 +49,6 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private GameplayUIManager gameplayUIManager;
     [Header("System References")]
 
-    // Public property to access the current player instance safely
     public PlayerController PlayerInstance { get; private set; }
 
     private TileData[,] boardData;
@@ -58,7 +56,6 @@ public class BoardManager : MonoBehaviour
 
     void Awake()
     {
-        // Convert the list of mappings into a dictionary for fast lookups.
         tileAssetDictionary = new Dictionary<TileType, TileBase>();
         foreach (var mapping in tileMappings)
         {
@@ -78,7 +75,6 @@ public class BoardManager : MonoBehaviour
                 gameplayUIManager.ClearAllCommandSlots();
             }
         }
-        // --- 1. Cleanup previous level ---
         if (PlayerInstance != null)
         {
             PlayerInstance.HaltExecution();
@@ -86,7 +82,6 @@ public class BoardManager : MonoBehaviour
         }
         ClearBoardVisuals();
 
-        // --- 2. Set up for the new level ---
         currentLevelIndex = levelIndex;
 
         TextAsset levelAsset = levelFiles[currentLevelIndex];
@@ -96,7 +91,6 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
-        // --- 3. Build the new level ---
         BuildBoardFromData(levelAsset);
     }
 
@@ -109,7 +103,6 @@ public class BoardManager : MonoBehaviour
         Vector2Int startPosition = Vector2Int.zero;
         bool startFound = false;
 
-        // Pass 1: Initialize tiles
         foreach (var tile in loadedLevel.tiles)
         {
             tile.tileTypeEnum = (TileType)System.Enum.Parse(typeof(TileType), tile.type, true);
@@ -133,7 +126,6 @@ public class BoardManager : MonoBehaviour
             boardData[tile.position.x, tile.position.y] = tile;
         }
 
-        // Pass 2: Synchronize bridges
         for (int x = 0; x < loadedLevel.width; x++)
         {
             for (int y = 0; y < loadedLevel.height; y++)
@@ -170,21 +162,22 @@ public class BoardManager : MonoBehaviour
                 ToggleSwitch(tile);
                 break;
             case TileType.WeakFloor:
-                if (tile.stepsRemaining > 0)
+                if (tile.stepsRemaining <= 0)
                 {
-                    tile.stepsRemaining--;
-                    Debug.Log($"Stepped on Weak Floor at {tile.position}. Steps remaining: {tile.stepsRemaining}");
+                    Debug.Log("Weak Floor broke!");
+                    tile.tileTypeEnum = TileType.Air;
+                    UpdateTileVisual(tile); 
 
-                    if (tile.stepsRemaining == 0)
+                    if (PlayerInstance != null)
                     {
-                        Debug.Log("Weak Floor broke!");
-                        tile.tileTypeEnum = TileType.Air;
-                        UpdateTileVisual(tile);
-                        RestartLevel();
-                        return;
+                        PlayerInstance.HaltExecution();
                     }
-                    UpdateTileVisual(tile);
+                    PlayerInstance?.OnSequenceFail?.Invoke();
+                    RestartLevel();
+                    
+                    return; 
                 }
+                UpdateTileVisual(tile);
                 break;
             case TileType.End:
                 Debug.Log("Player reached the end! Loading next level.");
@@ -355,18 +348,14 @@ public class BoardManager : MonoBehaviour
 
             if (nextLevelIndex >= levelFiles.Count)
             {
-                // Player has finished the last level.
                 Debug.Log("CONGRATULATIONS! You've completed all levels!");
 
-                // 1. Set the flag to show the high scores.
                 MainMenuController.ShowHighScoresOnLoad = true;
 
-                // 2. Transition directly to the main menu.
                 TransitionManager.Instance.TransitionToScene("MainMenuScene");
             }
             else
             {
-                // There are more levels to play. Transition to the next one.
                 TransitionManager.Instance.PlayTransition(() => LoadLevel(nextLevelIndex));
             }
         }
@@ -387,7 +376,6 @@ public class BoardManager : MonoBehaviour
         var levelData = new LevelData();
         if (!string.IsNullOrEmpty(compactData.startDirection))
         {
-            // Try to parse the string into our Direction enum. The 'true' makes it case-insensitive.
             if (System.Enum.TryParse(compactData.startDirection, true, out Direction parsedDirection))
             {
                 levelData.startDirection = parsedDirection;
@@ -501,8 +489,6 @@ public class BoardManager : MonoBehaviour
             mainCamera.orthographicSize = (boardHeight / 2f) * boardPadding;
         }
 
-        // --- THE ONLY CORRECTION IS HERE ---
-        // This -0.5f offset centers the camera on the middle of the tiles, not the grid lines.
         Vector3 boardCenter = new Vector3(boardWidth / 2f, boardHeight / 2f , -10);
 
         Vector3 panelCenterScreen = gameViewPanel.position;

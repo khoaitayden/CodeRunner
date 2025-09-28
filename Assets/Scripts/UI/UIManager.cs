@@ -28,6 +28,7 @@ public class GameplayUIManager : MonoBehaviour
     public TextMeshProUGUI stepCountText;
     public TextMeshProUGUI currentLevelText;
     public TextMeshProUGUI playerNameText;
+    public TextMeshProUGUI timerText;
 
     [Header("Settings")]
     public int mainSlotCount = 12;

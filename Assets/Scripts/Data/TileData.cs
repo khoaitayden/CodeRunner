@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// An enum to define all possible tile types.
 public enum TileType
 {
     Floor,

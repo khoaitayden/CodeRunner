@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 
-// Represents a single definition (e.g., "SW1" or "B1")
 [System.Serializable]
 public class TileDefinition
 {
-    public string key; // e.g., "SW1"
-    public string type; // e.g., "Switch"
+    public string key; 
+    public string type; 
     public int switchId = 0;
     public int controlledBySwitchId = 0;
     public bool isBridgeInitiallyActive = true;
@@ -13,11 +12,10 @@ public class TileDefinition
     public int initialSteps = 0;
 }
 
-// Represents the entire compact JSON file structure
 [System.Serializable]
 public class CompactLevelData
 {
     public List<string> layout;
     public List<TileDefinition> definitions;
-    public string startDirection; // <-- ADD THIS LINE
+    public string startDirection; 
 }

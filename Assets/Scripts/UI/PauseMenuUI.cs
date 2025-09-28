@@ -5,13 +5,13 @@ using UnityEngine.UI;
 public class PauseMenuUI : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private GameObject visualPanel; // Reference to the child panel
-    [SerializeField] private GameObject settingsPanel; // Reference to the settings panel
+    [SerializeField] private GameObject visualPanel;
+    [SerializeField] private GameObject settingsPanel; 
 
     [Header("Buttons")]
     [SerializeField] private Button continueButton;
-    [SerializeField] private Button settingsButton; // Good to add for completeness
-    [SerializeField] private Button endButton; // If you want a back button in settings
+    [SerializeField] private Button settingsButton; 
+    [SerializeField] private Button endButton; 
 
     [Header("Scene Settings")]
     [SerializeField] private string mainMenuSceneName = "MainMenuScene";
@@ -20,12 +20,9 @@ public class PauseMenuUI : MonoBehaviour
 
     void Start()
     {
-        // Ensure the VISUAL panel is hidden at the start.
-        // This parent controller object will remain active.
         visualPanel.SetActive(false);
         Time.timeScale = 1f;
 
-        // Hook up button listeners
         continueButton.onClick.AddListener(ContinueGame);
         settingsButton.onClick.AddListener(OpenSettings);
         endButton.onClick.AddListener(EndGameSession);
@@ -33,7 +30,6 @@ public class PauseMenuUI : MonoBehaviour
 
     void Update()
     {
-        // This Update will now run every frame because this GameObject is always active.
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             TogglePause();
@@ -60,14 +56,10 @@ public class PauseMenuUI : MonoBehaviour
     
     public void EndGameSession()
     {
-        // IMPORTANT: Always unpause before leaving the scene.
         Time.timeScale = 1f;
 
-        // --- THIS IS THE NEW LOGIC ---
-        // 1. Set the static flag to true so the main menu knows to show the high scores.
         MainMenuController.ShowHighScoresOnLoad = true;
 
-        // 2. Transition to the main menu scene.
         if (TransitionManager.Instance != null)
         {
             TransitionManager.Instance.TransitionToScene(mainMenuSceneName);

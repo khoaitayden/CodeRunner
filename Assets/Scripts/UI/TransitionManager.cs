@@ -56,21 +56,15 @@ public class TransitionManager : MonoBehaviour
         isTransitioning = false;
     }
     
-    // --- NEW COROUTINE FOR SCENE LOADING ---
     private IEnumerator TransitionSceneCoroutine(string sceneName)
     {
         isTransitioning = true;
         transitionCanvasGroup.blocksRaycasts = true;
 
-        // 1. Fade In (to black)
         yield return StartCoroutine(Fade(1f));
 
-        // 2. Load the scene asynchronously and wait for it to complete.
-        // This is the crucial change. The coroutine will pause here.
         yield return SceneManager.LoadSceneAsync(sceneName);
 
-        // 3. Fade Out (from black)
-        // This will only start AFTER the new scene is fully loaded and active.
         yield return StartCoroutine(Fade(0f));
 
         transitionCanvasGroup.blocksRaycasts = false;

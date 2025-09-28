@@ -1,0 +1,66 @@
+{
+  "layout": [
+    "S..a..###E",
+    ".bbb..#.c.",
+    ". . W2##..",
+    ".d...###f.",
+    ".eee..g..#",
+    "###..hhh.."
+  ],
+  "startDirection": "Right",
+  "definitions": [
+    {
+      "key": "a",
+      "type": "Switch",
+      "switchId": 1
+    },
+    {
+      "key": "b",
+      "type": "Bridge",
+      "controlledBySwitchId": 1,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "c",
+      "type": "Bridge",
+      "controlledBySwitchId": 2,
+      "isBridgeInitiallyActive": true,
+      "activateOnSwitchOn": false
+    },
+    {
+      "key": "d",
+      "type": "Switch",
+      "switchId": 2
+    },
+    {
+      "key": "e",
+      "type": "Bridge",
+      "controlledBySwitchId": 2,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "f",
+      "type": "Switch",
+      "switchId": 3
+    },
+    {
+      "key": "g",
+      "type": "Switch",
+      "switchId": 4
+    },
+    {
+      "key": "h",
+      "type": "Bridge",
+      "controlledBySwitchId": 4,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "W2",
+      "type": "WeakFloor",
+      "initialSteps": 2
+    }
+  ]
+}

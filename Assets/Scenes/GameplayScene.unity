@@ -2273,9 +2273,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Player: Potato
-
-'
+  m_text: as
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2388,8 +2386,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0.568}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 168.285, y: -105}
-  m_SizeDelta: {x: 336.57, y: 70}
+  m_AnchoredPosition: {x: 150, y: -105}
+  m_SizeDelta: {x: 300, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &721738153
 MonoBehaviour:
@@ -2411,7 +2409,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Step: '
+  m_text: 'Step: 100'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3160,6 +3158,7 @@ MonoBehaviour:
   stepCountText: {fileID: 721738153}
   currentLevelText: {fileID: 1673283964}
   playerNameText: {fileID: 650659560}
+  timerText: {fileID: 0}
   mainSlotCount: 12
   loopPanelPrefab: {fileID: 2185296726916667290, guid: 0784d1f1463f7bf47ba82bc5d94e4621, type: 3}
   loopSectionParent: {fileID: 1798600098}
@@ -4606,8 +4605,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 513.28503, y: -105}
-  m_SizeDelta: {x: 353.43, y: 70}
+  m_AnchoredPosition: {x: 540, y: -105}
+  m_SizeDelta: {x: 300, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1673283964
 MonoBehaviour:
@@ -4629,7 +4628,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Level: \n"
+  m_text: 'Level: 10
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5458,11 +5459,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelFiles:
   - {fileID: 4900000, guid: cf9bfe1c697b6f0488f5a55e84800ca4, type: 3}
+  - {fileID: 4900000, guid: d43977187842ab24c82cd2748655da36, type: 3}
   - {fileID: 4900000, guid: 918b1935d808f7c47b92d865f79ff0fa, type: 3}
   - {fileID: 4900000, guid: b89f83925a5222649a996c7a9285d4b7, type: 3}
   - {fileID: 4900000, guid: 6ae0afa4f69ef9d429d2745560a7d188, type: 3}
-  winSound: {fileID: 8300000, guid: 5f3acabf881e3b44a96c35ea16bd28af, type: 3}
-  lostSound: {fileID: 8300000, guid: c32828da0e494224987972f566b12eef, type: 3}
+  - {fileID: 4900000, guid: 554e4f225339d084c8f231b04d1d6ab7, type: 3}
+  - {fileID: 4900000, guid: fa32a6c8a4cdb6a4c9b8627b358e336f, type: 3}
+  - {fileID: 4900000, guid: 7aed68f14ad97fa46aa09062189ed6cb, type: 3}
+  - {fileID: 4900000, guid: af2645e72190bd34aa76354d11bc6898, type: 3}
+  - {fileID: 4900000, guid: 0869e215eb592ee4eb1f5c4e96fdaf6e, type: 3}
   playerPrefab: {fileID: 6724069641675009704, guid: 75c846321eb58ab4ea8832e6de9ce7eb, type: 3}
   baseLayer: {fileID: 1236824271}
   interactableLayer: {fileID: 511549361}

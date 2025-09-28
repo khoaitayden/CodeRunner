@@ -12,10 +12,8 @@ public class SettingsMenuUI : MonoBehaviour
 
     private void OnEnable()
     {
-        // When the panel becomes visible, load the current settings into the sliders.
         LoadSliderValues();
         
-        // Add listeners to the sliders to call the manager when they are changed.
         masterSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetMasterVolume);
         musicSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetMusicVolume);
         sfxSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetSFXVolume);
@@ -25,7 +23,6 @@ public class SettingsMenuUI : MonoBehaviour
 
     private void OnDisable()
     {
-        // It's good practice to remove listeners when the object is disabled.
         masterSlider.onValueChanged.RemoveAllListeners();
         musicSlider.onValueChanged.RemoveAllListeners();
         sfxSlider.onValueChanged.RemoveAllListeners();
@@ -34,7 +31,6 @@ public class SettingsMenuUI : MonoBehaviour
 
     private void LoadSliderValues()
     {
-        // We need to convert the saved dB value back to a linear 0-1 value for the slider.
         AudioSettingsManager.Instance.mainMixer.GetFloat(AudioSettingsManager.MASTER_KEY, out float masterDb);
         masterSlider.value = Mathf.Pow(10, masterDb / 20);
 

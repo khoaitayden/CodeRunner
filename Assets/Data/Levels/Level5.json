@@ -1,10 +1,12 @@
 {
   "layout": [
-    "S...... ",
-    "a     . ",
-    "W1     .",
-    ".     . ",
-    "E..b... "
+    "        ",
+    "  ... ..bE ",
+    "  . . .  . ",
+    "  . .a.  . ",
+    "  .  .   . ",
+    "  .  .   . ",
+    " S......c. "
   ],
   "startDirection": "Right",
   "definitions": [
@@ -21,9 +23,11 @@
       "activateOnSwitchOn": true
     },
     {
-      "key": "W1",
-      "type": "WeakFloor",
-      "initialSteps": 1
+      "key": "c",
+      "type": "Bridge",
+      "controlledBySwitchId": 1,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
     }
   ]
 }

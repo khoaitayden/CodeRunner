@@ -1,31 +1,10 @@
 {
   "layout": [
-    " ####",
-    " a.c.",
-    " b  .",
-    " S  E",
-    "     "
+    "....  ",
+    ".  .  ",
+    "S  ..E"
   ],
   "startDirection": "Up",
   "definitions": [
-    {
-      "key": "a",
-      "type": "Switch",
-      "switchId": 1
-    },
-    {
-      "key": "b",
-      "type": "Bridge",
-      "controlledBySwitchId": 1,
-      "isBridgeInitiallyActive": true,
-      "activateOnSwitchOn": false
-    },
-    {
-      "key": "c",
-      "type": "Bridge",
-      "controlledBySwitchId": 1,
-      "isBridgeInitiallyActive": false,
-      "activateOnSwitchOn": true
-    }
   ]
 }

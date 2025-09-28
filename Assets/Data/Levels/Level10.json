@@ -1,0 +1,106 @@
+{
+  "layout": [
+    "S..a..##.E.",
+    ".bbb..#c.dd",
+    ". #W1.#.##.",
+    ". eee###f..",
+    ".g..W2..h..",
+    ".iii..#jj..",
+    ". #..kkk#..",
+    ".l...###m.."
+  ],
+  "startDirection": "Right",
+  "definitions": [
+    {
+      "key": "a",
+      "type": "Switch",
+      "switchId": 1
+    },
+    {
+      "key": "b",
+      "type": "Bridge",
+      "controlledBySwitchId": 1,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "c",
+      "type": "Bridge",
+      "controlledBySwitchId": 2,
+      "isBridgeInitiallyActive": true,
+      "activateOnSwitchOn": false
+    },
+    {
+      "key": "d",
+      "type": "Bridge",
+      "controlledBySwitchId": 2,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "e",
+      "type": "Bridge",
+      "controlledBySwitchId": 3,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "f",
+      "type": "Switch",
+      "switchId": 3
+    },
+    {
+      "key": "g",
+      "type": "Switch",
+      "switchId": 4
+    },
+    {
+      "key": "h",
+      "type": "Bridge",
+      "controlledBySwitchId": 4,
+      "isBridgeInitiallyActive": true,
+      "activateOnSwitchOn": false
+    },
+    {
+      "key": "i",
+      "type": "Bridge",
+      "controlledBySwitchId": 5,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "j",
+      "type": "Switch",
+      "switchId": 5
+    },
+    {
+      "key": "k",
+      "type": "Bridge",
+      "controlledBySwitchId": 1,
+      "isBridgeInitiallyActive": true,
+      "activateOnSwitchOn": false
+    },
+    {
+      "key": "l",
+      "type": "Switch",
+      "switchId": 2
+    },
+    {
+      "key": "m",
+      "type": "Bridge",
+      "controlledBySwitchId": 6,
+      "isBridgeInitiallyActive": false,
+      "activateOnSwitchOn": true
+    },
+    {
+      "key": "W1",
+      "type": "WeakFloor",
+      "initialSteps": 1
+    },
+    {
+      "key": "W2",
+      "type": "WeakFloor",
+      "initialSteps": 2
+    }
+  ]
+}

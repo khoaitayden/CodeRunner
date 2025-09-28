@@ -1,7 +1,7 @@
 using UnityEngine;
-using System.Collections; // Required for Coroutines
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.Events; // Required for UnityEvent
+using UnityEngine.Events;
 
 public enum Direction { Up, Right, Down, Left }
 
@@ -20,7 +20,6 @@ public class PlayerController : MonoBehaviour
     [Header("Sound Effects")]
     [SerializeField] private AudioClip fallSound;
     [SerializeField] private AudioClip hitWallSound;
-    [SerializeField] private AudioClip moveSound;
     [SerializeField] private AudioClip turnSound;
     [SerializeField] private AudioClip lostSound;
     [SerializeField] private AudioClip winSound;
@@ -93,7 +92,7 @@ public class PlayerController : MonoBehaviour
                 for (int i = 0; i < command.RepeatCount; i++)
                 {
                     yield return StartCoroutine(ExecuteCommands(command.SubCommands));
-                    if (!isExecuting) yield break; // Stop immediately if a sub-command failed
+                    if (!isExecuting) yield break; 
                 }
                 Debug.Log("--- Ending Loop ---");
             }
@@ -164,7 +163,6 @@ public class PlayerController : MonoBehaviour
                 Debug.Log("Moved Forward to: "
                     + currentPosition);
                 boardManager.PlayerLandedOnTile(currentPosition);
-                SFXManager.Instance.PlayRandomPitchSoundEffect(moveSound, 0.8f, 1.5f);
                 break;
             case MoveResult.Blocked:
                 SFXManager.Instance.PlayRandomPitchSoundEffect(hitWallSound, 0.5f, 1.5f);
